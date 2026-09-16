@@ -1,0 +1,39 @@
+{
+  "name": "kenai-quest",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Kenai Quest — plataforma gamificada de metas com colecionaveis do Kenai",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "npm run build -w @kenai/shared && npm run build -w @kenai/server && npm run build -w @kenai/client",
+    "build:shared": "npm run build -w @kenai/shared",
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:server": "npm run dev -w @kenai/server",
+    "dev:client": "npm run dev -w @kenai/client",
+    "migrate": "npm run migrate -w @kenai/server",
+    "migrate:up": "npm run migrate:up -w @kenai/server",
+    "migrate:down": "npm run migrate:down -w @kenai/server",
+    "migrate:status": "npm run migrate:status -w @kenai/server",
+    "seed": "npm run seed -w @kenai/server",
+    "create:admin": "npm run create:admin -w @kenai/server",
+    "jobs:resolve": "npm run jobs:resolve -w @kenai/server",
+    "test": "npm run test -w @kenai/shared && npm run test -w @kenai/server",
+    "test:server": "npm run test -w @kenai/server",
+    "test:shared": "npm run test -w @kenai/shared",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,css}\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,221 @@
+@import 'tailwindcss';
+
+/*
+ * Kenai Quest design tokens.
+ *
+ * Dark mode is toggled by data-theme on <html>, set before first paint by the
+ * inline script in index.html. The custom variant below teaches Tailwind to
+ * read that attribute instead of the prefers-color-scheme default.
+ */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  /* Official brand colours — never altered. */
+  --color-surf-50: #eef2f8;
+  --color-surf-100: #d8e1ee;
+  --color-surf-200: #b3c3dc;
+  --color-surf-300: #8AA2C4;
+  --color-surf-400: #6280ab;
+  --color-surf-500: #3B5B8A;  /* Blue Surf */
+  --color-surf-600: #334e76;
+  --color-surf-700: #2a4062;
+  --color-surf-800: #21324d;
+  --color-surf-900: #18253a;
+  --color-surf-950: #101a29;
+
+  --color-sun-50: #fef4e9;
+  --color-sun-100: #fde4cb;
+  --color-sun-200: #fac897;
+  --color-sun-300: #f7ab63;
+  --color-sun-400: #F5983F;
+  --color-sun-500: #F28B30;  /* Sunkissed Orange */
+  --color-sun-600: #d9761f;
+  --color-sun-700: #b35f18;
+  --color-sun-800: #8c4a13;
+  --color-sun-900: #66360e;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-card: 1rem;
+  --radius-pill: 9999px;
+}
+
+/*
+ * Semantic tokens. Components reference these, never raw palette steps, so the
+ * two themes stay in sync and dark mode is a designed palette rather than an
+ * inversion: deep navy surfaces, lifted foregrounds, brand accents preserved.
+ */
+:root,
+[data-theme='light'] {
+  --bg-app: #f7f9fc;
+  --bg-surface: #ffffff;
+  --bg-surface-raised: #ffffff;
+  --bg-muted: #eef2f8;
+  --bg-inset: #e6ecf5;
+
+  --text-primary: #18253a;
+  --text-secondary: #4d5d78;
+  --text-muted: #73819b;
+  --text-inverse: #ffffff;
+
+  --border-subtle: #dde5f0;
+  --border-strong: #c3d0e3;
+
+  --brand-primary: #3B5B8A;
+  --brand-primary-hover: #334e76;
+  --brand-accent: #F28B30;
+  --brand-accent-hover: #d9761f;
+  --brand-accent-soft: #fef4e9;
+
+  --focus-ring: #F28B30;
+
+  /* Missing / locked puzzle regions. Clearly part of the mechanic, never an
+     error state. */
+  --piece-locked: #e6ecf5;
+  --piece-locked-line: #cdd9e8;
+  --piece-missed: #dfe6f0;
+  --piece-missed-line: #bcc9dc;
+
+  --shadow-card: 0 1px 2px rgb(24 37 58 / 0.04), 0 8px 24px -12px rgb(24 37 58 / 0.18);
+  --shadow-raised: 0 2px 4px rgb(24 37 58 / 0.06), 0 16px 40px -16px rgb(24 37 58 / 0.24);
+}
+
+[data-theme='dark'] {
+  --bg-app: #0d1626;
+  --bg-surface: #142136;
+  --bg-surface-raised: #1a2a43;
+  --bg-muted: #1c2c46;
+  --bg-inset: #101b2c;
+
+  --text-primary: #e8eef8;
+  --text-secondary: #a9b8d0;
+  --text-muted: #7d8da8;
+  --text-inverse: #0d1626;
+
+  --border-subtle: #22344f;
+  --border-strong: #2e4463;
+
+  /* Lifted so the brand blue keeps contrast against a navy surface. */
+  --brand-primary: #8AA2C4;
+  --brand-primary-hover: #a5b8d3;
+  --brand-accent: #F5983F;
+  --brand-accent-hover: #f7ab63;
+  --brand-accent-soft: #2a2015;
+
+  --focus-ring: #F5983F;
+
+  --piece-locked: #1b2b44;
+  --piece-locked-line: #26395a;
+  --piece-missed: #172438;
+  --piece-missed-line: #2a3d5c;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.35), 0 16px 40px -16px rgb(0 0 0 / 0.7);
+}
+
+/* Rarity accents. Defined once, consumed via the shared RARITY_TOKENS map. */
+:root {
+  --rarity-common: #7d8da8;
+  --rarity-uncommon: #4a9d7a;
+  --rarity-rare: #3B5B8A;
+  --rarity-epic: #8256b8;
+  --rarity-legendary: #F28B30;
+}
+
+[data-theme='dark'] {
+  --rarity-common: #94a3bd;
+  --rarity-uncommon: #5fbb93;
+  --rarity-rare: #8AA2C4;
+  --rarity-epic: #a47ed4;
+  --rarity-legendary: #F5983F;
+}
+
+@layer base {
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    /* Guards against any single element forcing a horizontal scrollbar. */
+    overflow-x: hidden;
+  }
+
+  /* Visible focus for keyboard users on every interactive element. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  h1, h2, h3, h4 {
+    color: var(--text-primary);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .kq-surface {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .kq-skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--bg-muted) 25%,
+      var(--bg-inset) 50%,
+      var(--bg-muted) 75%
+    );
+    background-size: 200% 100%;
+    animation: kq-shimmer 1.4s ease-in-out infinite;
+    border-radius: 0.5rem;
+  }
+}
+
+@keyframes kq-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* The reveal: a new piece fades and settles in. Deliberately restrained —
+   no confetti, no bounce. */
+@keyframes kq-piece-reveal {
+  0% { opacity: 0; transform: scale(1.06); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.kq-piece-reveal {
+  animation: kq-piece-reveal 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes kq-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.kq-fade-up {
+  animation: kq-fade-up 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
