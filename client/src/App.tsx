@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { PublicLayout } from './layouts/PublicLayout';
+import { AuthLayout } from './layouts/AuthLayout';
 import { AppLayout } from './layouts/AppLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 import {
@@ -31,8 +32,12 @@ export function App() {
       <Route element={<PublicLayout />}>
         <Route index element={<LandingPage />} />
         <Route element={<RedirectIfAuthenticated />}>
-          <Route path="entrar" element={<LoginPage />} />
-          <Route path="cadastro" element={<RegisterPage />} />
+          {/* Both auth screens share AuthLayout: same paths, same guard, one
+              place that owns the background photograph and the logo. */}
+          <Route element={<AuthLayout />}>
+            <Route path="entrar" element={<LoginPage />} />
+            <Route path="cadastro" element={<RegisterPage />} />
+          </Route>
         </Route>
       </Route>
 

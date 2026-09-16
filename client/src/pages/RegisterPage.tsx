@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { RegisterInput } from '@kenai/shared';
 import { registerSchema } from '@kenai/shared';
-import { Logo } from '../components/brand/Logo';
 import { Button } from '../components/ui/Button';
 import { TextField } from '../components/ui/Field';
 import { useAuth } from '../contexts/AuthContext';
@@ -38,58 +37,61 @@ export function RegisterPage() {
     }
   }
 
+  // The background photograph, the logo and the page's outer spacing all come
+  // from AuthLayout, which login and sign-up share.
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-md flex-col justify-center px-4 py-12 sm:px-6">
-      <div className="mb-8 flex flex-col items-center text-center">
-        <Logo height={52} />
-        <h1 className="mt-6 text-2xl font-semibold">Criar conta</h1>
-        <p className="mt-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Comece a transformar suas metas em artes colecionáveis.
-        </p>
+    <>
+      <div className="kq-auth-card p-6 sm:p-7">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-semibold">Criar conta</h1>
+          <p className="mt-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Comece a transformar suas metas em artes colecionáveis.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+          <TextField
+            label="Nome"
+            autoComplete="name"
+            placeholder="Como quer ser chamado"
+            error={errors.name?.message}
+            {...register('name')}
+          />
+
+          <TextField
+            label="E-mail"
+            type="email"
+            autoComplete="email"
+            placeholder="voce@exemplo.com"
+            error={errors.email?.message}
+            {...register('email')}
+          />
+
+          <TextField
+            label="Senha"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Mínimo de 8 caracteres"
+            hint="Use pelo menos 8 caracteres, com letras e números."
+            error={errors.password?.message}
+            {...register('password')}
+          />
+
+          {formError && (
+            <div
+              className="rounded-xl px-3.5 py-3 text-sm"
+              style={{ backgroundColor: 'var(--bg-muted)', color: '#d9534f' }}
+              role="alert"
+            >
+              {formError}
+            </div>
+          )}
+
+          <Button type="submit" fullWidth size="lg" isLoading={isSubmitting}>
+            Criar conta
+          </Button>
+        </form>
       </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="kq-surface space-y-4 p-6" noValidate>
-        <TextField
-          label="Nome"
-          autoComplete="name"
-          placeholder="Como quer ser chamado"
-          error={errors.name?.message}
-          {...register('name')}
-        />
-
-        <TextField
-          label="E-mail"
-          type="email"
-          autoComplete="email"
-          placeholder="voce@exemplo.com"
-          error={errors.email?.message}
-          {...register('email')}
-        />
-
-        <TextField
-          label="Senha"
-          type="password"
-          autoComplete="new-password"
-          placeholder="Mínimo de 8 caracteres"
-          hint="Use pelo menos 8 caracteres, com letras e números."
-          error={errors.password?.message}
-          {...register('password')}
-        />
-
-        {formError && (
-          <div
-            className="rounded-xl px-3.5 py-3 text-sm"
-            style={{ backgroundColor: 'var(--bg-muted)', color: '#d9534f' }}
-            role="alert"
-          >
-            {formError}
-          </div>
-        )}
-
-        <Button type="submit" fullWidth size="lg" isLoading={isSubmitting}>
-          Criar conta
-        </Button>
-      </form>
 
       <p className="mt-6 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
         Já tem uma conta?{' '}
@@ -97,6 +99,6 @@ export function RegisterPage() {
           Entrar
         </Link>
       </p>
-    </div>
+    </>
   );
 }

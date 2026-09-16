@@ -30,8 +30,15 @@ const STEPS = [
 export function LandingPage() {
   return (
     <div>
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+      {/* The hero is the one landing block that carries the official background
+          photograph, behind the same veil the auth screens use so the copy keeps
+          its contrast in both themes. */}
+      <section
+        className="kq-photo-bg kq-photo-veil kq-photo-veil-soft relative isolate border-b"
+        style={{ borderColor: 'var(--border-subtle)' }}
+      >
+        {/* Content sits above the veil; the section itself is the full-bleed band. */}
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2">
           <div className="kq-fade-up">
             <span
               className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold"

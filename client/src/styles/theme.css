@@ -78,6 +78,16 @@
 
   --shadow-card: 0 1px 2px rgb(24 37 58 / 0.04), 0 8px 24px -12px rgb(24 37 58 / 0.18);
   --shadow-raised: 0 2px 4px rgb(24 37 58 / 0.06), 0 16px 40px -16px rgb(24 37 58 / 0.24);
+
+  /* Veils laid over the official background photograph. The image itself is
+     never touched — only what sits above it changes between the two themes. */
+  --photo-veil: linear-gradient(180deg, rgb(247 249 252 / 0.58) 0%, rgb(247 249 252 / 0.74) 100%);
+  --photo-veil-soft: linear-gradient(
+    180deg,
+    rgb(247 249 252 / 0.8) 0%,
+    rgb(247 249 252 / 0.94) 100%
+  );
+  --surface-translucent: rgb(255 255 255 / 0.88);
 }
 
 [data-theme='dark'] {
@@ -111,6 +121,10 @@
 
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.35), 0 16px 40px -16px rgb(0 0 0 / 0.7);
+
+  --photo-veil: linear-gradient(180deg, rgb(13 22 38 / 0.62) 0%, rgb(13 22 38 / 0.8) 100%);
+  --photo-veil-soft: linear-gradient(180deg, rgb(13 22 38 / 0.84) 0%, rgb(13 22 38 / 0.95) 100%);
+  --surface-translucent: rgb(20 33 54 / 0.88);
 }
 
 /* Rarity accents. Defined once, consumed via the shared RARITY_TOKENS map. */
@@ -179,6 +193,59 @@
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
+  }
+
+  /*
+   * Official Kenai Quest background photograph.
+   *
+   * Used exactly as supplied: one single file, referenced by URL, never
+   * recoloured and never stretched. `cover` preserves the image's own aspect
+   * ratio at every viewport size, `center` keeps the subject in frame and
+   * `no-repeat` means it is painted once. --bg-app shows through only while the
+   * file is still loading.
+   */
+  .kq-photo-bg {
+    background-color: var(--bg-app);
+    background-image: url('/brand/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  /*
+   * The readability veil above the photo. Theme-driven, so light and dark mode
+   * each get their own treatment from the same image.
+   */
+  .kq-photo-veil::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--photo-veil);
+    pointer-events: none;
+  }
+
+  .kq-photo-veil-soft::after {
+    background: var(--photo-veil-soft);
+  }
+
+  /*
+   * Authentication card: a lightly translucent surface so the photograph stays
+   * present behind the form without ever competing with it. Restrained on
+   * purpose — one blur, no stacked glass panels.
+   */
+  .kq-auth-card {
+    background-color: var(--surface-translucent);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-raised);
+    backdrop-filter: blur(14px) saturate(115%);
+  }
+
+  /* Browsers without backdrop-filter get the plain opaque surface instead. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .kq-auth-card {
+      background-color: var(--bg-surface);
+    }
   }
 
   .kq-skeleton {
