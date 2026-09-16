@@ -30,11 +30,11 @@ const STEPS = [
 export function LandingPage() {
   return (
     <div>
-      {/* The hero is the one landing block that carries the official background
-          photograph, behind the same veil the auth screens use so the copy keeps
-          its contrast in both themes. */}
+      {/* The hero is the one landing block that carries a background photograph:
+          background2.png, under the lighter hero veil so the image keeps its
+          impact while the headline, copy and CTAs stay readable in both themes. */}
       <section
-        className="kq-photo-bg kq-photo-veil kq-photo-veil-soft relative isolate border-b"
+        className="kq-hero-bg kq-hero-veil relative isolate border-b"
         style={{ borderColor: 'var(--border-subtle)' }}
       >
         {/* Content sits above the veil; the section itself is the full-bleed band. */}

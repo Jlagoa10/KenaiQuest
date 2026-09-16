@@ -79,13 +79,17 @@
   --shadow-card: 0 1px 2px rgb(24 37 58 / 0.04), 0 8px 24px -12px rgb(24 37 58 / 0.18);
   --shadow-raised: 0 2px 4px rgb(24 37 58 / 0.06), 0 16px 40px -16px rgb(24 37 58 / 0.24);
 
-  /* Veils laid over the official background photograph. The image itself is
-     never touched — only what sits above it changes between the two themes. */
+  /* Veils laid over the official background photographs. The images themselves
+     are never touched — only what sits above them changes between the themes.
+     --photo-veil covers the authentication screens; the --hero-veil pair covers
+     the landing hero, where the photo is meant to stay far more present. */
   --photo-veil: linear-gradient(180deg, rgb(247 249 252 / 0.58) 0%, rgb(247 249 252 / 0.74) 100%);
-  --photo-veil-soft: linear-gradient(
-    180deg,
-    rgb(247 249 252 / 0.8) 0%,
-    rgb(247 249 252 / 0.94) 100%
+  --hero-veil: linear-gradient(180deg, rgb(247 249 252 / 0.72) 0%, rgb(247 249 252 / 0.86) 100%);
+  --hero-veil-wide: linear-gradient(
+    90deg,
+    rgb(247 249 252 / 0.9) 0%,
+    rgb(247 249 252 / 0.72) 52%,
+    rgb(247 249 252 / 0.4) 100%
   );
   --surface-translucent: rgb(255 255 255 / 0.88);
 }
@@ -123,8 +127,26 @@
   --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.35), 0 16px 40px -16px rgb(0 0 0 / 0.7);
 
   --photo-veil: linear-gradient(180deg, rgb(13 22 38 / 0.62) 0%, rgb(13 22 38 / 0.8) 100%);
-  --photo-veil-soft: linear-gradient(180deg, rgb(13 22 38 / 0.84) 0%, rgb(13 22 38 / 0.95) 100%);
+  --hero-veil: linear-gradient(180deg, rgb(13 22 38 / 0.74) 0%, rgb(13 22 38 / 0.88) 100%);
+  --hero-veil-wide: linear-gradient(
+    90deg,
+    rgb(13 22 38 / 0.92) 0%,
+    rgb(13 22 38 / 0.74) 52%,
+    rgb(13 22 38 / 0.44) 100%
+  );
   --surface-translucent: rgb(20 33 54 / 0.88);
+}
+
+/*
+ * Where each background photograph is anchored inside its frame. Separate
+ * values per breakpoint because a phone crops far more of a wide photo than a
+ * desktop does, and the two compositions should not be forced to match.
+ */
+:root {
+  --photo-focus: center;
+  --photo-focus-sm: center;
+  --hero-focus: center;
+  --hero-focus-sm: center;
 }
 
 /* Rarity accents. Defined once, consumed via the shared RARITY_TOKENS map. */
@@ -208,8 +230,37 @@
     background-color: var(--bg-app);
     background-image: url('/brand/background.png');
     background-size: cover;
-    background-position: center;
+    background-position: var(--photo-focus);
     background-repeat: no-repeat;
+  }
+
+  /*
+   * Landing hero photograph — the second official image, referenced straight
+   * from /public and shown under a much lighter veil than the auth screens, so
+   * it keeps its impact instead of being washed out.
+   */
+  .kq-hero-bg {
+    background-color: var(--bg-app);
+    background-image: url('/brand/background2.png');
+    background-size: cover;
+    background-position: var(--hero-focus);
+    background-repeat: no-repeat;
+  }
+
+  /*
+   * Phone framing. `cover` has to crop a wide photo hard on a narrow viewport,
+   * so each image gets its own focal point there rather than reusing the
+   * desktop crop. Both ship centred; these two declarations are the single
+   * place to shift either one.
+   */
+  @media (max-width: 640px) {
+    .kq-photo-bg {
+      background-position: var(--photo-focus-sm);
+    }
+
+    .kq-hero-bg {
+      background-position: var(--hero-focus-sm);
+    }
   }
 
   /*
@@ -224,8 +275,23 @@
     pointer-events: none;
   }
 
-  .kq-photo-veil-soft::after {
-    background: var(--photo-veil-soft);
+  /*
+   * Hero veil. Lighter than the auth one, and on a wide screen it becomes
+   * horizontal: dense behind the headline and CTAs on the left, clearing
+   * towards the right so the photograph stays visible where nothing sits on it.
+   */
+  .kq-hero-veil::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--hero-veil);
+    pointer-events: none;
+  }
+
+  @media (min-width: 1024px) {
+    .kq-hero-veil::after {
+      background: var(--hero-veil-wide);
+    }
   }
 
   /*
