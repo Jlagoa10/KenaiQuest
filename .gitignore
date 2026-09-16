@@ -141,3 +141,8 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Kenai Quest — artes salvas em disco pelo driver de storage local.
+# Em produção use STORAGE_DRIVER=supabase; nada disso vai para o repositório.
+uploads/
+server/uploads/

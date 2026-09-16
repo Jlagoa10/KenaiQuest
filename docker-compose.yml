@@ -1,0 +1,29 @@
+# PostgreSQL local para desenvolvimento.
+#
+# Opcional: se você já tem um PostgreSQL 14+ instalado, basta apontar a
+# DATABASE_URL para ele. Este arquivo existe apenas para facilitar o setup.
+#
+#   docker compose up -d
+#   npm run migrate:up
+#   npm run seed
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kenai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kenai
+      POSTGRES_PASSWORD: kenai_dev_password
+      POSTGRES_DB: kenai_quest
+    ports:
+      - '5432:5432'
+    volumes:
+      - kenai_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U kenai -d kenai_quest']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  kenai_pgdata:
