@@ -93,9 +93,11 @@ export function CollectibleDetailPage() {
 
             {collectible.piecesMissed > 0 && (
               <p className="mt-3 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
-                As {collectible.piecesMissed}{' '}
-                {collectible.piecesMissed === 1 ? 'área vazia' : 'áreas vazias'} correspondem a
-                dias não concluídos. Elas são permanentes nesta cópia.
+                {/* Article, noun and verb all have to agree — "As 1 área vazia
+                    correspondem" is not Portuguese. */}
+                {collectible.piecesMissed === 1
+                  ? 'A área vazia corresponde a um dia não concluído. Ela é permanente nesta cópia.'
+                  : `As ${collectible.piecesMissed} áreas vazias correspondem a dias não concluídos. Elas são permanentes nesta cópia.`}
               </p>
             )}
           </CardBody>

@@ -27,6 +27,11 @@ pool.on('error', (error) => {
   logger.error({ err: error }, 'Erro inesperado no pool do PostgreSQL');
 });
 
+/** Connectivity probe used at startup to fail fast with a clear message. */
+export async function pingDatabase(): Promise<void> {
+  await pool.query('SELECT 1');
+}
+
 export async function closePool(): Promise<void> {
   await pool.end();
 }

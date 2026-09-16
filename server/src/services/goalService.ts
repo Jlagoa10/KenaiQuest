@@ -22,7 +22,6 @@ import {
 import { GOAL_CREATION_LOCK_NAMESPACE } from '../config/constants.js';
 import { acquireAdvisoryLock, withTransaction } from '../database/transaction.js';
 import type { Queryable } from '../database/types.js';
-import { pool } from '../database/pool.js';
 import { AppError, ErrorCodes, forbidden, notFound } from '../utils/errors.js';
 import { shortHash } from '../utils/crypto.js';
 import { currentDateInTimezone } from '../utils/timezone.js';
@@ -542,11 +541,7 @@ export async function resolveAllActiveGoals(now?: Date): Promise<number> {
   let finalizedCount = 0;
 
   for (const goalId of goalIds) {
-    const owner = await pool.query<{ timezone: string }>(
-      `SELECT u.timezone FROM goals g JOIN users u ON u.id = g.user_id WHERE g.id = $1`,
-      [goalId],
-    );
-    const timezone = owner.rows[0]?.timezone;
+    const timezone = await goalRepository.findGoalOwnerTimezone(goalId);
     if (!timezone) continue;
 
     const result = await withTransaction((client) =>

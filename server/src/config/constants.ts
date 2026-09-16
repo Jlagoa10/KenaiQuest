@@ -18,3 +18,15 @@ export const ARTWORK_CACHE_MAX_ENTRIES = 32;
  * goals" check race free without locking the whole table.
  */
 export const GOAL_CREATION_LOCK_NAMESPACE = 4711;
+
+/**
+ * How long a just-rotated refresh token keeps working.
+ *
+ * Two tabs restoring the same session, or a reload landing mid-refresh, both
+ * present the same token within a few hundred milliseconds. Without this
+ * window, the slower request looks identical to a replayed stolen token and
+ * reuse detection would log the user out of every device. A few seconds is
+ * ample for a race and far too short to be useful to an attacker who is not
+ * already racing the legitimate client.
+ */
+export const REFRESH_ROTATION_GRACE_MS = 15_000;

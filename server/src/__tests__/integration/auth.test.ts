@@ -145,6 +145,63 @@ suite('Autenticação', () => {
     expect(revoked.rows[0].total).toBeGreaterThanOrEqual(2);
   });
 
+  it('não desconecta o usuário quando duas abas renovam a sessão ao mesmo tempo', async () => {
+    const { user, password } = await createTestUser({ email: 'abas@exemplo.com' });
+
+    const login = await request(getApp())
+      .post('/api/auth/login')
+      .send({ email: user.email, password })
+      .expect(200);
+
+    const cookies = login.headers['set-cookie'] as unknown as string[];
+    const refreshCookie = cookies.find((cookie) => cookie.startsWith('kq_refresh='));
+    const cookieValue = refreshCookie?.split(';')[0] ?? '';
+
+    // Two tabs restoring the same session present the same token. Rotation
+    // alone would make the slower one look like a replay and burn the family.
+    const [first, second] = await Promise.all([
+      request(getApp()).post('/api/auth/refresh').set('Cookie', cookieValue),
+      request(getApp()).post('/api/auth/refresh').set('Cookie', cookieValue),
+    ]);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+
+    const burned = await pool.query(
+      `SELECT count(*)::int AS total FROM refresh_tokens WHERE revoked_reason = 'REUSE_DETECTED'`,
+    );
+    expect(burned.rows[0].total).toBe(0);
+  });
+
+  it('ainda detecta reuso de um token antigo e revoga a família inteira', async () => {
+    const { user, password } = await createTestUser({ email: 'roubo@exemplo.com' });
+
+    const login = await request(getApp())
+      .post('/api/auth/login')
+      .send({ email: user.email, password })
+      .expect(200);
+
+    const cookies = login.headers['set-cookie'] as unknown as string[];
+    const cookieValue =
+      cookies.find((cookie) => cookie.startsWith('kq_refresh='))?.split(';')[0] ?? '';
+
+    await request(getApp()).post('/api/auth/refresh').set('Cookie', cookieValue).expect(200);
+
+    // Push the rotation outside the grace window: this is no longer a race,
+    // it is a replayed token.
+    await pool.query(
+      `UPDATE refresh_tokens SET revoked_at = now() - INTERVAL '10 minutes'
+       WHERE revoked_reason = 'ROTATED'`,
+    );
+
+    await request(getApp()).post('/api/auth/refresh').set('Cookie', cookieValue).expect(401);
+
+    const burned = await pool.query(
+      `SELECT count(*)::int AS total FROM refresh_tokens WHERE revoked_reason = 'REUSE_DETECTED'`,
+    );
+    expect(burned.rows[0].total).toBeGreaterThan(0);
+  });
+
   it('encerra a sessão no logout', async () => {
     const agent = request.agent(getApp());
     await agent

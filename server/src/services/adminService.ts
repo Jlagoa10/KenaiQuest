@@ -1,7 +1,7 @@
 import type { AdminStatsDto, AdminUserDto, UserRole } from '@kenai/shared';
-import { pool } from '../database/pool.js';
 import { AppError, ErrorCodes, notFound } from '../utils/errors.js';
 import * as userRepository from '../repositories/userRepository.js';
+import * as artworkRepository from '../repositories/artworkRepository.js';
 import * as goalRepository from '../repositories/goalRepository.js';
 import * as collectibleRepository from '../repositories/collectibleRepository.js';
 import * as tradeRepository from '../repositories/tradeRepository.js';
@@ -63,14 +63,9 @@ export async function changeUserRole(params: {
   if (!updated) throw notFound('Usuário não encontrado.');
 
   // A role change must not leave an elevated session alive.
-  await refreshTokenRepository.revokeAllUserRefreshTokens(params.userId);
+  await refreshTokenRepository.revokeAllUserRefreshTokens(params.userId, 'ROLE_CHANGE');
 
-  const counts = await pool.query(
-    `SELECT
-       (SELECT count(*)::int FROM goals WHERE user_id = $1)        AS goals,
-       (SELECT count(*)::int FROM collectibles WHERE owner_id = $1) AS collectibles`,
-    [params.userId],
-  );
+  const counts = await userRepository.countUserActivity(params.userId);
 
   return {
     id: updated.id,
@@ -78,8 +73,8 @@ export async function changeUserRole(params: {
     email: updated.email,
     role: updated.role,
     timezone: updated.timezone,
-    goalsCount: counts.rows[0]?.goals ?? 0,
-    collectiblesCount: counts.rows[0]?.collectibles ?? 0,
+    goalsCount: counts.goals,
+    collectiblesCount: counts.collectibles,
     createdAt: updated.createdAt.toISOString(),
   };
 }
@@ -87,25 +82,19 @@ export async function changeUserRole(params: {
 export async function getStats(): Promise<AdminStatsDto> {
   const [goalCounts, artworks, collectibles, trades, userCounts] = await Promise.all([
     goalRepository.countGoalsByStatus(),
-    pool.query(
-      `SELECT count(*)::int AS total, count(*) FILTER (WHERE is_active)::int AS active
-       FROM artworks`,
-    ),
+    artworkRepository.countArtworks(),
     collectibleRepository.countCollectibles(),
     tradeRepository.countTrades(),
-    pool.query(
-      `SELECT count(*)::int AS total, count(*) FILTER (WHERE role = 'ADMIN')::int AS admins
-       FROM users`,
-    ),
+    userRepository.countUsersByRole(),
   ]);
 
   return {
-    users: userCounts.rows[0]?.total ?? 0,
-    admins: userCounts.rows[0]?.admins ?? 0,
+    users: userCounts.total,
+    admins: userCounts.admins,
     activeGoals: goalCounts.ACTIVE,
     completedGoals: goalCounts.COMPLETED,
-    artworks: artworks.rows[0]?.total ?? 0,
-    activeArtworks: artworks.rows[0]?.active ?? 0,
+    artworks: artworks.total,
+    activeArtworks: artworks.active,
     collectibles,
     pendingTrades: trades.pending,
     completedTrades: trades.completed,

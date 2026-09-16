@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import type { UserDto, UserRole } from '@kenai/shared';
 import { DEFAULT_TIMEZONE } from '@kenai/shared';
 import { env } from '../config/env.js';
-import { BCRYPT_ROUNDS } from '../config/constants.js';
+import { BCRYPT_ROUNDS, REFRESH_ROTATION_GRACE_MS } from '../config/constants.js';
 import { AppError, ErrorCodes, unauthorized } from '../utils/errors.js';
 import { generateOpaqueToken, hashToken } from '../utils/crypto.js';
 import { isValidTimezone } from '../utils/timezone.js';
@@ -135,26 +135,37 @@ export async function refreshSession(
   if (!stored) throw unauthorized();
 
   if (stored.revokedAt) {
-    await refreshTokenRepository.revokeRefreshTokenFamily(stored.familyId);
-    throw unauthorized();
+    // A token revoked by rotation moments ago is a race, not a theft: two tabs
+    // restoring the same session, or a reload that landed mid-refresh. Honour
+    // it once more instead of burning the family and signing the user out
+    // everywhere. Anything else — replayed later, or revoked by logout, a
+    // password change or a role change — is treated as reuse.
+    const isRecentRotation =
+      stored.revokedReason === 'ROTATED' &&
+      Date.now() - stored.revokedAt.getTime() <= REFRESH_ROTATION_GRACE_MS;
+
+    if (!isRecentRotation) {
+      await refreshTokenRepository.revokeRefreshTokenFamily(stored.familyId, 'REUSE_DETECTED');
+      throw unauthorized();
+    }
   }
 
   if (stored.expiresAt.getTime() <= Date.now()) {
-    await refreshTokenRepository.revokeRefreshToken(stored.id);
+    await refreshTokenRepository.revokeRefreshToken(stored.id, 'ROTATED');
     throw unauthorized();
   }
 
   const user = await userRepository.findUserById(stored.userId);
   if (!user) throw unauthorized();
 
-  await refreshTokenRepository.revokeRefreshToken(stored.id);
+  await refreshTokenRepository.revokeRefreshToken(stored.id, 'ROTATED');
   return { user, tokens: await issueSession(user, stored.familyId) };
 }
 
 export async function logout(refreshToken: string | undefined): Promise<void> {
   if (!refreshToken) return;
   const stored = await refreshTokenRepository.findRefreshTokenByHash(hashToken(refreshToken));
-  if (stored) await refreshTokenRepository.revokeRefreshTokenFamily(stored.familyId);
+  if (stored) await refreshTokenRepository.revokeRefreshTokenFamily(stored.familyId, 'LOGOUT');
 }
 
 export async function changePassword(params: {
@@ -172,5 +183,5 @@ export async function changePassword(params: {
 
   await userRepository.updateUserPassword(params.userId, await hashPassword(params.newPassword));
   // Changing a password invalidates every existing session.
-  await refreshTokenRepository.revokeAllUserRefreshTokens(params.userId);
+  await refreshTokenRepository.revokeAllUserRefreshTokens(params.userId, 'PASSWORD_CHANGE');
 }

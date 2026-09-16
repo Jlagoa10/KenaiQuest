@@ -54,6 +54,10 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
 }
 
 async function rawRequest(path: string, options: RequestOptions = {}): Promise<Response> {
+  return rawFetch(apiUrl(path), options);
+}
+
+async function rawFetch(url: string, options: RequestOptions = {}): Promise<Response> {
   const { body, skipRefresh: _skipRefresh, headers, ...rest } = options;
 
   const requestHeaders = new Headers(headers);
@@ -68,7 +72,7 @@ async function rawRequest(path: string, options: RequestOptions = {}): Promise<R
     payload = JSON.stringify(body);
   }
 
-  return fetch(apiUrl(path), {
+  return fetch(url, {
     ...rest,
     headers: requestHeaders,
     // Sends the refresh cookie on the endpoints scoped to receive it.
@@ -151,3 +155,34 @@ export const api = {
   patch: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'PATCH', body }),
   delete: <T>(path: string) => apiRequest<T>(path, { method: 'DELETE' }),
 };
+
+/**
+ * Fetches an authenticated image.
+ *
+ * The composited artwork endpoints are protected by the same Bearer token as
+ * the rest of the API, and a plain `<img src>` cannot attach an Authorization
+ * header — so the image has to be fetched here and handed to the element as an
+ * object URL.
+ *
+ * Using fetch (rather than a query-string token) keeps a single auth mechanism
+ * and still benefits from the browser HTTP cache: the URL carries a version
+ * token that only changes when a new piece is unlocked, so a repeat view is
+ * served from cache or revalidated against the server ETag.
+ */
+export async function fetchAuthenticatedImage(absoluteUrl: string): Promise<Blob> {
+  let response = await rawFetch(absoluteUrl, { method: 'GET' });
+
+  if (response.status === 401) {
+    const refreshed = await attemptRefresh();
+    if (refreshed) {
+      response = await rawFetch(absoluteUrl, { method: 'GET' });
+    } else {
+      accessToken = null;
+      onUnauthorized?.();
+      throw await toApiError(response);
+    }
+  }
+
+  if (!response.ok) throw await toApiError(response);
+  return response.blob();
+}

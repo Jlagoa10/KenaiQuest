@@ -158,6 +158,18 @@ export async function countGoalDayStatusesForGoals(
   return counts;
 }
 
+/** Timezone of a goal's owner. Needed to resolve day windows in the sweep. */
+export async function findGoalOwnerTimezone(
+  goalId: string,
+  db: Queryable = pool,
+): Promise<string | null> {
+  const result = await db.query(
+    `SELECT u.timezone FROM goals g JOIN users u ON u.id = g.user_id WHERE g.id = $1`,
+    [goalId],
+  );
+  return (result.rows[0]?.timezone as string | undefined) ?? null;
+}
+
 export async function countGoalsByStatus(
   db: Queryable = pool,
 ): Promise<Record<GoalStatus, number>> {

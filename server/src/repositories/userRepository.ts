@@ -82,6 +82,33 @@ export async function countAdmins(db: Queryable = pool): Promise<number> {
   return result.rows[0]?.total ?? 0;
 }
 
+export async function countUsersByRole(
+  db: Queryable = pool,
+): Promise<{ total: number; admins: number }> {
+  const result = await db.query(
+    `SELECT count(*)::int AS total, count(*) FILTER (WHERE role = 'ADMIN')::int AS admins
+     FROM users`,
+  );
+  return { total: result.rows[0]?.total ?? 0, admins: result.rows[0]?.admins ?? 0 };
+}
+
+/** Per-user activity counters shown next to a role change. */
+export async function countUserActivity(
+  userId: string,
+  db: Queryable = pool,
+): Promise<{ goals: number; collectibles: number }> {
+  const result = await db.query(
+    `SELECT
+       (SELECT count(*)::int FROM goals WHERE user_id = $1)         AS goals,
+       (SELECT count(*)::int FROM collectibles WHERE owner_id = $1) AS collectibles`,
+    [userId],
+  );
+  return {
+    goals: result.rows[0]?.goals ?? 0,
+    collectibles: result.rows[0]?.collectibles ?? 0,
+  };
+}
+
 export interface AdminUserRow {
   id: string;
   name: string;

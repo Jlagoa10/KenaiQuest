@@ -22,6 +22,7 @@ import {
   useUpdateArtwork,
 } from '../../hooks/useAdmin';
 import { artworkPreviewUrl } from '../../services/adminService';
+import { useAuthenticatedImage } from '../../hooks/useAuthenticatedImage';
 import { useToast } from '../../contexts/ToastContext';
 import { ApiError } from '../../services/apiClient';
 
@@ -152,25 +153,12 @@ export function AdminArtworksPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {artworks.map((artwork) => (
             <Card key={artwork.id}>
-              <div
-                className="relative w-full overflow-hidden"
-                style={{ aspectRatio: `${artwork.width / artwork.height}`, backgroundColor: 'var(--bg-inset)' }}
-              >
-                <img
-                  src={artworkPreviewUrl(artwork.id)}
-                  alt={`Prévia de ${artwork.name}`}
-                  className="h-full w-full object-contain"
-                  loading="lazy"
-                />
-                {!artwork.isActive && (
-                  <span
-                    className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                    style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-muted)' }}
-                  >
-                    Inativa
-                  </span>
-                )}
-              </div>
+              <ArtworkPreview
+                artworkId={artwork.id}
+                name={artwork.name}
+                aspectRatio={artwork.width / artwork.height}
+                isActive={artwork.isActive}
+              />
               <CardBody className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="min-w-0 truncate text-sm font-semibold">{artwork.name}</h3>
@@ -327,6 +315,39 @@ export function AdminArtworksPage() {
           armazenamento. Esta ação não pode ser desfeita.
         </p>
       </Modal>
+    </div>
+  );
+}
+
+/** Admin preview. Authenticated like every other artwork image. */
+function ArtworkPreview({
+  artworkId,
+  name,
+  aspectRatio,
+  isActive,
+}: {
+  artworkId: string;
+  name: string;
+  aspectRatio: number;
+  isActive: boolean;
+}) {
+  const { src, isLoading } = useAuthenticatedImage(artworkPreviewUrl(artworkId));
+
+  return (
+    <div
+      className="relative w-full overflow-hidden"
+      style={{ aspectRatio: `${aspectRatio}`, backgroundColor: 'var(--bg-inset)' }}
+    >
+      {isLoading && <div className="kq-skeleton absolute inset-0" aria-hidden="true" />}
+      {src && <img src={src} alt={`Prévia de ${name}`} className="h-full w-full object-contain" />}
+      {!isActive && (
+        <span
+          className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+          style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-muted)' }}
+        >
+          Inativa
+        </span>
+      )}
     </div>
   );
 }

@@ -1,12 +1,20 @@
 import { pool } from '../database/pool.js';
 import type { Queryable } from '../database/types.js';
 
+export type RevokedReason =
+  | 'ROTATED'
+  | 'REUSE_DETECTED'
+  | 'LOGOUT'
+  | 'PASSWORD_CHANGE'
+  | 'ROLE_CHANGE';
+
 export interface RefreshTokenRecord {
   id: string;
   userId: string;
   familyId: string;
   expiresAt: Date;
   revokedAt: Date | null;
+  revokedReason: RevokedReason | null;
 }
 
 export async function storeRefreshToken(
@@ -25,7 +33,7 @@ export async function findRefreshTokenByHash(
   db: Queryable = pool,
 ): Promise<RefreshTokenRecord | null> {
   const result = await db.query(
-    `SELECT id, user_id, family_id, expires_at, revoked_at
+    `SELECT id, user_id, family_id, expires_at, revoked_at, revoked_reason
      FROM refresh_tokens WHERE token_hash = $1`,
     [tokenHash],
   );
@@ -37,13 +45,20 @@ export async function findRefreshTokenByHash(
     familyId: row.family_id,
     expiresAt: row.expires_at,
     revokedAt: row.revoked_at,
+    revokedReason: row.revoked_reason,
   };
 }
 
-export async function revokeRefreshToken(id: string, db: Queryable = pool): Promise<void> {
-  await db.query('UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1 AND revoked_at IS NULL', [
-    id,
-  ]);
+export async function revokeRefreshToken(
+  id: string,
+  reason: RevokedReason,
+  db: Queryable = pool,
+): Promise<void> {
+  await db.query(
+    `UPDATE refresh_tokens SET revoked_at = now(), revoked_reason = $2
+     WHERE id = $1 AND revoked_at IS NULL`,
+    [id, reason],
+  );
 }
 
 /**
@@ -52,21 +67,25 @@ export async function revokeRefreshToken(id: string, db: Queryable = pool): Prom
  */
 export async function revokeRefreshTokenFamily(
   familyId: string,
+  reason: RevokedReason,
   db: Queryable = pool,
 ): Promise<void> {
   await db.query(
-    'UPDATE refresh_tokens SET revoked_at = now() WHERE family_id = $1 AND revoked_at IS NULL',
-    [familyId],
+    `UPDATE refresh_tokens SET revoked_at = now(), revoked_reason = $2
+     WHERE family_id = $1 AND revoked_at IS NULL`,
+    [familyId, reason],
   );
 }
 
 export async function revokeAllUserRefreshTokens(
   userId: string,
+  reason: RevokedReason,
   db: Queryable = pool,
 ): Promise<void> {
   await db.query(
-    'UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL',
-    [userId],
+    `UPDATE refresh_tokens SET revoked_at = now(), revoked_reason = $2
+     WHERE user_id = $1 AND revoked_at IS NULL`,
+    [userId, reason],
   );
 }
 

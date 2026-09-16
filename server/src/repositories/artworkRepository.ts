@@ -53,6 +53,16 @@ export async function countActiveArtworksByRarity(
   return counts;
 }
 
+export async function countArtworks(
+  db: Queryable = pool,
+): Promise<{ total: number; active: number }> {
+  const result = await db.query(
+    `SELECT count(*)::int AS total, count(*) FILTER (WHERE is_active)::int AS active
+     FROM artworks`,
+  );
+  return { total: result.rows[0]?.total ?? 0, active: result.rows[0]?.active ?? 0 };
+}
+
 export interface ArtworkWithUsage extends ArtworkRecord {
   collectiblesAwarded: number;
   activeGoals: number;

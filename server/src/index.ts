@@ -1,12 +1,12 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
-import { closePool, pool } from './database/pool.js';
+import { closePool, pingDatabase } from './database/pool.js';
 
 async function start(): Promise<void> {
   // Fail fast with a clear message rather than on the first request.
   try {
-    await pool.query('SELECT 1');
+    await pingDatabase();
   } catch (error) {
     logger.error(
       { err: error },

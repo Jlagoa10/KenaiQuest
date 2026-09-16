@@ -269,6 +269,7 @@ nada específico de provedor neles.
 |---|---|
 | `001_initial_schema` | enums, tabelas, índices, constraints e triggers |
 | `002_default_reward_rules` | configuração inicial de recompensa por duração |
+| `003_refresh_token_rotation_grace` | motivo da revogação do token, para separar corrida de reuso |
 
 As regras de recompensa vêm como **migração**, não como seed, porque são
 configuração de sistema: um banco de produção recém-criado já consegue sortear
@@ -602,6 +603,25 @@ rotacionado revoga toda a família — é a detecção padrão de token roubado.
 Essa combinação é imune a CSRF (chamadas de API não carregam credencial
 ambiente) e não deixa credencial de longa duração acessível a JavaScript.
 
+**Janela de tolerância na rotação.** Rotação pura não distingue um token roubado
+de uma corrida honesta: duas abas restaurando a mesma sessão no mesmo instante
+apresentam o mesmo token, e a mais lenta parece um replay. Sem tratamento, isso
+desconectaria o usuário de todos os dispositivos — algo que acontece ao abrir
+duas abas ao mesmo tempo. Por isso o banco registra **por que** cada token foi
+revogado: um token revogado por rotação há poucos segundos é aceito mais uma
+vez, enquanto o mesmo token apresentado depois da janela, ou revogado por
+logout, troca de senha ou mudança de papel, continua queimando a família
+inteira. Há testes cobrindo os dois caminhos.
+
+### Imagens autenticadas
+
+As rotas de imagem exigem o mesmo Bearer token do restante da API, e uma tag
+`<img src>` não consegue enviar cabeçalho `Authorization`. Por isso as imagens
+são buscadas por `fetch` autenticado e entregues ao elemento como object URL
+(`useAuthenticatedImage`). Manter um único mecanismo de autenticação evita
+inventar um token de imagem em query string, e o cache HTTP do navegador
+continua valendo, porque a URL carrega o token de versão do conteúdo.
+
 ### Troca atômica
 
 Aceitar uma proposta acontece em **uma única transação**: trava a proposta, depois
@@ -633,6 +653,8 @@ Os testes de integração rodam contra um PostgreSQL real definido por
 `TEST_DATABASE_URL`. Sem essa variável eles são **ignorados**, e apenas os testes
 unitários rodam — o `npm test` não quebra em uma máquina sem banco.
 
+São 111 testes no total: 49 de domínio puro e 62 de integração.
+
 Cobertura das regras críticas:
 
 - geometria das peças para **todas** as 359 durações (contagem exata, cobertura
@@ -652,6 +674,8 @@ Cobertura das regras críticas:
 - upload rejeitando arquivo que não é imagem
 - rotas administrativas retornando 403 para usuário comum
 - o payload de uma meta ativa **não** conter nome, raridade ou id da arte
+- duas abas renovando a sessão ao mesmo tempo **não** desconectarem o usuário
+- reuso de um token antigo ainda revogar a família inteira
 
 ---
 

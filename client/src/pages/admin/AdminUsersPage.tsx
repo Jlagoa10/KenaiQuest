@@ -12,6 +12,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { ApiError } from '../../services/apiClient';
 
+/** Avoids rendering "1 cópias". */
+function pluralise(count: number, singular: string, plural: string): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 export function AdminUsersPage() {
   const { user: currentUser } = useAuth();
   const { notify } = useToast();
@@ -119,8 +124,9 @@ export function AdminUsersPage() {
                         </p>
                         <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>
                           {USER_ROLE_LABELS[user.role]} · desde{' '}
-                          {formatIsoDatePtBr(user.createdAt.slice(0, 10))} · {user.goalsCount} metas ·{' '}
-                          {user.collectiblesCount} cópias
+                          {formatIsoDatePtBr(user.createdAt.slice(0, 10))} ·{' '}
+                          {pluralise(user.goalsCount, 'meta', 'metas')} ·{' '}
+                          {pluralise(user.collectiblesCount, 'cópia', 'cópias')}
                         </p>
                       </div>
                     </div>
