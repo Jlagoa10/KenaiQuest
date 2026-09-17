@@ -20,7 +20,7 @@ function refreshCookieOptions(): CookieOptions {
     httpOnly: true,
     secure: isProduction,
     // The frontend (Vercel) and the API are on different sites in production.
-    sameSite: isProduction ? 'none' : 'lax',
+    sameSite: 'lax',
     path: REFRESH_COOKIE_PATH,
     maxAge: env.REFRESH_TOKEN_TTL_DAYS * 86_400_000,
     ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
