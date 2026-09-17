@@ -78,14 +78,20 @@
 
   --shadow-card: 0 1px 2px rgb(24 37 58 / 0.04), 0 8px 24px -12px rgb(24 37 58 / 0.18);
   --shadow-raised: 0 2px 4px rgb(24 37 58 / 0.06), 0 16px 40px -16px rgb(24 37 58 / 0.24);
+  /* Lifts the public top bar off whatever sits below it, photograph included. */
+  --shadow-topbar: 0 1px 2px rgb(24 37 58 / 0.05), 0 6px 20px -16px rgb(24 37 58 / 0.35);
 
-  /* Veils laid over the official background photograph. The image itself is
-     never touched — only what sits above it changes between the two themes. */
+  /* Veils laid over the official background photographs. The images themselves
+     are never touched — only what sits above them changes between the themes.
+     --photo-veil covers the authentication screens; the --hero-veil pair covers
+     the landing hero, where the photo is meant to stay far more present. */
   --photo-veil: linear-gradient(180deg, rgb(247 249 252 / 0.58) 0%, rgb(247 249 252 / 0.74) 100%);
-  --photo-veil-soft: linear-gradient(
-    180deg,
-    rgb(247 249 252 / 0.8) 0%,
-    rgb(247 249 252 / 0.94) 100%
+  --hero-veil: linear-gradient(180deg, rgb(247 249 252 / 0.72) 0%, rgb(247 249 252 / 0.86) 100%);
+  --hero-veil-wide: linear-gradient(
+    90deg,
+    rgb(247 249 252 / 0.9) 0%,
+    rgb(247 249 252 / 0.72) 52%,
+    rgb(247 249 252 / 0.4) 100%
   );
   --surface-translucent: rgb(255 255 255 / 0.88);
 }
@@ -121,10 +127,37 @@
 
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.35), 0 16px 40px -16px rgb(0 0 0 / 0.7);
+  --shadow-topbar: 0 1px 2px rgb(0 0 0 / 0.35), 0 6px 20px -16px rgb(0 0 0 / 0.75);
 
   --photo-veil: linear-gradient(180deg, rgb(13 22 38 / 0.62) 0%, rgb(13 22 38 / 0.8) 100%);
-  --photo-veil-soft: linear-gradient(180deg, rgb(13 22 38 / 0.84) 0%, rgb(13 22 38 / 0.95) 100%);
+  --hero-veil: linear-gradient(180deg, rgb(13 22 38 / 0.74) 0%, rgb(13 22 38 / 0.88) 100%);
+  --hero-veil-wide: linear-gradient(
+    90deg,
+    rgb(13 22 38 / 0.92) 0%,
+    rgb(13 22 38 / 0.74) 52%,
+    rgb(13 22 38 / 0.44) 100%
+  );
   --surface-translucent: rgb(20 33 54 / 0.88);
+}
+
+/*
+ * Height of the public top bar. One value shared by the header itself and by
+ * the authentication photo layer, which starts exactly where the bar ends.
+ */
+:root {
+  --topbar-height: 4rem;
+}
+
+/*
+ * Where each background photograph is anchored inside its frame. Separate
+ * values per breakpoint because a phone crops far more of a wide photo than a
+ * desktop does, and the two compositions should not be forced to match.
+ */
+:root {
+  --photo-focus: center;
+  --photo-focus-sm: center;
+  --hero-focus: center;
+  --hero-focus-sm: center;
 }
 
 /* Rarity accents. Defined once, consumed via the shared RARITY_TOKENS map. */
@@ -196,6 +229,42 @@
   }
 
   /*
+   * Public top bar.
+   *
+   * It carries its own opaque surface so the header reads as chrome sitting
+   * above the page rather than as part of the background photograph behind it.
+   * `position: relative` plus a positive z-index keeps it above the auth
+   * screen's `fixed`, `-z-10` photo layer, which still covers the viewport
+   * underneath; the hairline border and the soft shadow are what draw the
+   * separation without adding any new colour.
+   */
+  .kq-topbar {
+    position: relative;
+    z-index: 10;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-topbar);
+  }
+
+  /* The bar's own row. Its height is the token, so the photo layer below can
+     line up with it without either side hard-coding a number. */
+  .kq-topbar-inner {
+    height: var(--topbar-height);
+  }
+
+  /*
+   * The authentication screens' photo layer. Fixed to the viewport so the image
+   * is never stretched or scrolled, but starting at the bottom edge of the top
+   * bar rather than at the top of the page: the photograph begins below the
+   * header instead of running underneath it.
+   */
+  .kq-photo-layer {
+    position: fixed;
+    inset: var(--topbar-height) 0 0 0;
+    z-index: -10;
+  }
+
+  /*
    * Official Kenai Quest background photograph.
    *
    * Used exactly as supplied: one single file, referenced by URL, never
@@ -208,8 +277,37 @@
     background-color: var(--bg-app);
     background-image: url('/brand/background.png');
     background-size: cover;
-    background-position: center;
+    background-position: var(--photo-focus);
     background-repeat: no-repeat;
+  }
+
+  /*
+   * Landing hero photograph — the second official image, referenced straight
+   * from /public and shown under a much lighter veil than the auth screens, so
+   * it keeps its impact instead of being washed out.
+   */
+  .kq-hero-bg {
+    background-color: var(--bg-app);
+    background-image: url('/brand/background2.png');
+    background-size: cover;
+    background-position: var(--hero-focus);
+    background-repeat: no-repeat;
+  }
+
+  /*
+   * Phone framing. `cover` has to crop a wide photo hard on a narrow viewport,
+   * so each image gets its own focal point there rather than reusing the
+   * desktop crop. Both ship centred; these two declarations are the single
+   * place to shift either one.
+   */
+  @media (max-width: 640px) {
+    .kq-photo-bg {
+      background-position: var(--photo-focus-sm);
+    }
+
+    .kq-hero-bg {
+      background-position: var(--hero-focus-sm);
+    }
   }
 
   /*
@@ -224,8 +322,23 @@
     pointer-events: none;
   }
 
-  .kq-photo-veil-soft::after {
-    background: var(--photo-veil-soft);
+  /*
+   * Hero veil. Lighter than the auth one, and on a wide screen it becomes
+   * horizontal: dense behind the headline and CTAs on the left, clearing
+   * towards the right so the photograph stays visible where nothing sits on it.
+   */
+  .kq-hero-veil::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--hero-veil);
+    pointer-events: none;
+  }
+
+  @media (min-width: 1024px) {
+    .kq-hero-veil::after {
+      background: var(--hero-veil-wide);
+    }
   }
 
   /*
