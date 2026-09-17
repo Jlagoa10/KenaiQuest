@@ -31,7 +31,7 @@ export function AppLayout() {
       </a>
 
       <header
-        className="kq-app-bar sticky top-0 z-30 border-b"
+        className="sticky top-0 z-30 border-b"
         style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
       >
         <div className="kq-topbar-inner mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
