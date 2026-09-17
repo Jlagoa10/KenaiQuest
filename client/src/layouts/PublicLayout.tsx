@@ -4,13 +4,14 @@ import { ThemeToggle } from '../components/layout/ThemeToggle';
 
 /*
  * The shell paints no background colour of its own: <body> already carries
- * --bg-app, and leaving this transparent is what lets the authentication
- * screens show the background photograph behind the header.
+ * --bg-app, so the background photograph keeps showing through behind the
+ * main content. The header is the exception — .kq-topbar gives it its own
+ * surface so it reads as a top bar rather than as part of that photograph.
  */
 export function PublicLayout() {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+      <header className="kq-topbar">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link to="/" aria-label="Kenai Quest, página inicial">
             <Logo height={34} />
