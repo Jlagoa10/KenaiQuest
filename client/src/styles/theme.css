@@ -144,28 +144,17 @@
  * Chrome geometry: the height of a top bar and the logo scale that sits in it.
  *
  * Every screen picks one of the four --logo-* steps through the Logo component
- * rather than passing its own pixel height, so the whole scale moves together —
- * including the narrow-screen step below, which is the single place phone
- * sizing is decided.
+ * rather than passing its own pixel height, so the whole scale moves together.
+ * Each step is the size that screen used originally, 20% larger: a noticeable
+ * lift that still leaves the bar and the page in the same proportions.
  */
 :root {
-  --topbar-height: 4.75rem;
+  --topbar-height: 4rem;
 
-  --logo-sm: 2.25rem;  /* 36px — footer */
-  --logo-md: 2.75rem;  /* 44px — top bars */
-  --logo-lg: 3.5rem;   /* 56px — page marks */
-  --logo-xl: 4.5rem;   /* 72px — authentication */
-}
-
-@media (max-width: 640px) {
-  :root {
-    --topbar-height: 4rem;
-
-    --logo-sm: 2rem;      /* 32px */
-    --logo-md: 2.375rem;  /* 38px */
-    --logo-lg: 3rem;      /* 48px */
-    --logo-xl: 3.75rem;   /* 60px */
-  }
+  --logo-sm: 2.125rem;  /* 34px — footer (28px × 1.2) */
+  --logo-md: 2.5rem;    /* 40px — top bars (34px × 1.2) */
+  --logo-lg: 3.25rem;   /* 52px — page marks (44px × 1.2) */
+  --logo-xl: 4.25rem;   /* 68px — authentication (56px × 1.2) */
 }
 
 /*
@@ -326,18 +315,6 @@
   }
 
   /*
-   * The application bar is the one row that also carries the main navigation,
-   * which appears at 768px. In that band the full-size mark would push the
-   * links out of the row, so it steps down one notch — still larger than it
-   * was — and returns to --logo-md from 1024px up, where there is room again.
-   */
-  @media (min-width: 768px) and (max-width: 1023px) {
-    .kq-app-bar .kq-logo {
-      --logo-size: var(--logo-sm);
-    }
-  }
-
-  /*
    * Official Kenai Quest background photograph.
    *
    * Used exactly as supplied: one single file, referenced by URL, never
@@ -361,7 +338,7 @@
    */
   .kq-hero-bg {
     background-color: var(--bg-app);
-    background-image: url('/brand/background2.png');
+    background-image: url('/brand/background2.jpg');
     background-size: cover;
     background-position: var(--hero-focus);
     background-repeat: no-repeat;

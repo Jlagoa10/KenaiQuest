@@ -146,3 +146,4 @@ vite.config.ts.timestamp-*
 # Em produção use STORAGE_DRIVER=supabase; nada disso vai para o repositório.
 uploads/
 server/uploads/
+.DS_Store

@@ -10,8 +10,8 @@ import { cn } from '../../utils/cn';
  *   lg  page marks (landing "how it works", 404)
  *   xl  the authentication screens
  *
- * The actual heights are the --logo-* tokens in theme.css, which also shrink
- * the whole scale on narrow screens.
+ * The actual heights are the --logo-* tokens in theme.css, one place for the
+ * whole scale.
  */
 export type LogoSize = 'sm' | 'md' | 'lg' | 'xl';
 
