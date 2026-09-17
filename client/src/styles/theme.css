@@ -141,6 +141,14 @@
 }
 
 /*
+ * Height of the public top bar. One value shared by the header itself and by
+ * the authentication photo layer, which starts exactly where the bar ends.
+ */
+:root {
+  --topbar-height: 4rem;
+}
+
+/*
  * Where each background photograph is anchored inside its frame. Separate
  * values per breakpoint because a phone crops far more of a wide photo than a
  * desktop does, and the two compositions should not be forced to match.
@@ -236,6 +244,24 @@
     background-color: var(--bg-surface);
     border-bottom: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-topbar);
+  }
+
+  /* The bar's own row. Its height is the token, so the photo layer below can
+     line up with it without either side hard-coding a number. */
+  .kq-topbar-inner {
+    height: var(--topbar-height);
+  }
+
+  /*
+   * The authentication screens' photo layer. Fixed to the viewport so the image
+   * is never stretched or scrolled, but starting at the bottom edge of the top
+   * bar rather than at the top of the page: the photograph begins below the
+   * header instead of running underneath it.
+   */
+  .kq-photo-layer {
+    position: fixed;
+    inset: var(--topbar-height) 0 0 0;
+    z-index: -10;
   }
 
   /*
