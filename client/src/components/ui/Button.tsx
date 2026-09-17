@@ -31,6 +31,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     className,
     children,
     disabled,
+    // HTML defaults a button inside a form to "submit"; most of ours are plain
+    // actions, so the safe default is "button". A form's submit button says
+    // type="submit" explicitly, and "reset" is still available the same way.
+    type = 'button',
     ...rest
   },
   ref,
@@ -52,6 +56,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   return (
     <button
       ref={ref}
+      type={type}
       disabled={isDisabled}
       aria-busy={isLoading || undefined}
       className={cn(
