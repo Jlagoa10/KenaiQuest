@@ -10,7 +10,7 @@ client/public/brand/
 ├── LogoSF.png          logo oficial com fundo transparente (logo principal)
 ├── LogoCF.png          logo oficial com fundo
 ├── background.png      imagem de fundo oficial da autenticação
-├── background2.png     imagem de fundo oficial do topo da página inicial
+├── background2.jpg     imagem de fundo oficial do topo da página inicial
 └── Kenai/
     └── KenPraia.png    arte colecionável inicial de desenvolvimento
 ```
@@ -22,7 +22,7 @@ client/public/brand/
 | `LogoSF.png` | navegação, autenticação, dashboard, rodapé, admin, favicon | `/brand/LogoSF.png` |
 | `LogoCF.png` | lugares que pedem uma versão contida, com fundo | `/brand/LogoCF.png` |
 | `background.png` | login e cadastro | `/brand/background.png` |
-| `background2.png` | topo (hero) da página inicial | `/brand/background2.png` |
+| `background2.jpg` | topo (hero) da página inicial | `/brand/background2.jpg` |
 | `Kenai/KenPraia.png` | arte inicial cadastrada pelo `npm run seed` | enviada ao storage |
 
 O componente `Logo` (`client/src/components/brand/Logo.tsx`) usa

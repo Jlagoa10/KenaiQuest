@@ -338,7 +338,7 @@
    */
   .kq-hero-bg {
     background-color: var(--bg-app);
-    background-image: url('/brand/background2.png');
+    background-image: url('/brand/background2.jpg');
     background-size: cover;
     background-position: var(--hero-focus);
     background-repeat: no-repeat;

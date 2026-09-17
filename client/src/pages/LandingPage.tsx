@@ -31,7 +31,7 @@ export function LandingPage() {
   return (
     <div>
       {/* The hero is the one landing block that carries a background photograph:
-          background2.png, under the lighter hero veil so the image keeps its
+          background2.jpg, under the lighter hero veil so the image keeps its
           impact while the headline, copy and CTAs stay readable in both themes. */}
       <section
         className="kq-hero-bg kq-hero-veil relative isolate border-b"
