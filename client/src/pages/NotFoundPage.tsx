@@ -6,7 +6,7 @@ import { Logo } from '../components/brand/Logo';
 export function NotFoundPage() {
   return (
     <div className="mx-auto flex min-h-[60dvh] max-w-md flex-col items-center justify-center px-4 text-center">
-      <Logo height={44} />
+      <Logo size="lg" />
       <Compass size={40} className="mt-8" style={{ color: 'var(--brand-primary)' }} aria-hidden="true" />
       <h1 className="mt-4 text-2xl font-semibold">Página não encontrada</h1>
       <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>

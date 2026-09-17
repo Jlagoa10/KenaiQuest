@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { cn } from '../../utils/cn';
 
+/**
+ * The four sizes the logo is allowed to take. Every screen picks one of these
+ * instead of passing pixels, so the scale lives in a single place:
+ *
+ *   sm  footer
+ *   md  top bars (public header, application header)
+ *   lg  page marks (landing "how it works", 404)
+ *   xl  the authentication screens
+ *
+ * The actual heights are the --logo-* tokens in theme.css, which also shrink
+ * the whole scale on narrow screens.
+ */
+export type LogoSize = 'sm' | 'md' | 'lg' | 'xl';
+
 interface LogoProps {
   /**
    * 'primary' uses LogoSF.png (transparent background) — the default everywhere.
@@ -8,8 +22,7 @@ interface LogoProps {
    */
   variant?: 'primary' | 'contained';
   className?: string;
-  /** Height in pixels. Width follows the file's own aspect ratio. */
-  height?: number;
+  size?: LogoSize;
   withWordmark?: boolean;
 }
 
@@ -17,7 +30,9 @@ interface LogoProps {
  * Official Kenai Quest logo.
  *
  * The asset is used exactly as supplied: no recolouring, no cropping, and
- * `width: auto` so the original aspect ratio is always preserved.
+ * `width: auto` so the original aspect ratio is always preserved. Each size
+ * also carries a max-width, so a wide file scales down on a phone rather than
+ * pushing the header out of the viewport — still never distorted.
  *
  * If the file has not been added to client/public/brand yet, this falls back to
  * a typographic wordmark so the interface stays usable. Dropping the real PNG
@@ -26,7 +41,7 @@ interface LogoProps {
 export function Logo({
   variant = 'primary',
   className,
-  height = 36,
+  size = 'md',
   withWordmark = false,
 }: LogoProps) {
   const [failed, setFailed] = useState(false);
@@ -35,8 +50,11 @@ export function Logo({
   if (failed) {
     return (
       <span
-        className={cn('inline-flex items-baseline gap-1.5 font-semibold tracking-tight', className)}
-        style={{ fontSize: height * 0.5 }}
+        className={cn(
+          `kq-logo-${size} inline-flex items-baseline gap-1.5 font-semibold tracking-tight`,
+          'kq-logo-fallback',
+          className,
+        )}
       >
         <span style={{ color: 'var(--brand-primary)' }}>Kenai</span>
         <span style={{ color: 'var(--brand-accent)' }}>Quest</span>
@@ -49,8 +67,7 @@ export function Logo({
       <img
         src={source}
         alt="Kenai Quest"
-        height={height}
-        style={{ height, width: 'auto' }}
+        className={cn('kq-logo', `kq-logo-${size}`)}
         onError={() => setFailed(true)}
         draggable={false}
       />

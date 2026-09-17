@@ -10,9 +10,10 @@ import { Logo } from '../components/brand/Logo';
  *
  *   background.png → Kenai Quest logo → authentication card → form
  *
- * The photo layer is fixed to the viewport, so the image is never stretched or
- * scrolled, and it starts at --topbar-height — the photograph begins below the
- * header rather than running behind it.
+ * The photo layer is fixed to the viewport, so the image is never stretched and
+ * always fills the screen: while the bar is on screen its opaque surface covers
+ * the top of the layer, and once the bar has scrolled away the photograph
+ * simply continues to the top edge instead of leaving an empty band there.
  */
 export function AuthLayout() {
   return (
@@ -23,7 +24,7 @@ export function AuthLayout() {
       <div className="mx-auto flex w-full max-w-md flex-col">
         <div className="mb-7 flex flex-col items-center text-center">
           <Link to="/" aria-label="Kenai Quest, página inicial">
-            <Logo height={56} />
+            <Logo size="xl" />
           </Link>
         </div>
 

@@ -7,16 +7,17 @@ import { ThemeToggle } from './ThemeToggle';
  * render this one component, so there is no second, slightly different header
  * to keep in sync.
  *
- * It carries its own opaque surface (.kq-topbar) and its height comes from
- * --topbar-height, the same token the authentication screens use to start the
- * background photograph below the bar.
+ * It carries its own opaque surface (.kq-topbar), never a transparent one, so
+ * the bar reads as chrome above the page rather than as part of whatever
+ * photograph sits behind the content. It scrolls away with the page — nothing
+ * here is fixed or sticky — and its height comes from --topbar-height.
  */
 export function PublicHeader() {
   return (
     <header className="kq-topbar">
       <div className="kq-topbar-inner mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link to="/" aria-label="Kenai Quest, página inicial">
-          <Logo height={34} />
+          <Logo size="md" />
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />

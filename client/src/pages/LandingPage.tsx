@@ -178,7 +178,7 @@ export function LandingPage() {
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-5 text-center">
-          <Logo height={44} />
+          <Logo size="lg" />
           <p className="max-w-md text-sm" style={{ color: 'var(--text-secondary)' }}>
             Até {MAX_ACTIVE_GOALS} metas ativas ao mesmo tempo, para você manter o foco no que
             realmente importa.

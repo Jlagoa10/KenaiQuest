@@ -141,11 +141,31 @@
 }
 
 /*
- * Height of the public top bar. One value shared by the header itself and by
- * the authentication photo layer, which starts exactly where the bar ends.
+ * Chrome geometry: the height of a top bar and the logo scale that sits in it.
+ *
+ * Every screen picks one of the four --logo-* steps through the Logo component
+ * rather than passing its own pixel height, so the whole scale moves together —
+ * including the narrow-screen step below, which is the single place phone
+ * sizing is decided.
  */
 :root {
-  --topbar-height: 4rem;
+  --topbar-height: 4.75rem;
+
+  --logo-sm: 2.25rem;  /* 36px — footer */
+  --logo-md: 2.75rem;  /* 44px — top bars */
+  --logo-lg: 3.5rem;   /* 56px — page marks */
+  --logo-xl: 4.5rem;   /* 72px — authentication */
+}
+
+@media (max-width: 640px) {
+  :root {
+    --topbar-height: 4rem;
+
+    --logo-sm: 2rem;      /* 32px */
+    --logo-md: 2.375rem;  /* 38px */
+    --logo-lg: 3rem;      /* 48px */
+    --logo-xl: 3.75rem;   /* 60px */
+  }
 }
 
 /*
@@ -253,15 +273,68 @@
   }
 
   /*
-   * The authentication screens' photo layer. Fixed to the viewport so the image
-   * is never stretched or scrolled, but starting at the bottom edge of the top
-   * bar rather than at the top of the page: the photograph begins below the
-   * header instead of running underneath it.
+   * The authentication screens' photo layer.
+   *
+   * Fixed to the viewport, so the image is never stretched and always fills the
+   * screen — including after the header has scrolled away, where an inset layer
+   * would leave an empty band at the top. While the bar is still in view its
+   * own opaque surface covers this layer, so the photograph reads as starting
+   * below the header without the header itself being pinned there.
    */
   .kq-photo-layer {
     position: fixed;
-    inset: var(--topbar-height) 0 0 0;
+    inset: 0;
     z-index: -10;
+  }
+
+  /*
+   * The logo. One height per size step, width always automatic so the official
+   * file keeps its aspect ratio, and a max-width so a wide logo scales down on
+   * a phone instead of pushing the bar out of the viewport.
+   */
+  .kq-logo {
+    height: var(--logo-size);
+    width: auto;
+    object-fit: contain;
+    max-width: var(--logo-max-width);
+  }
+
+  /* The typographic stand-in used until the official PNG is in place. */
+  .kq-logo-fallback {
+    font-size: calc(var(--logo-size) * 0.5);
+    line-height: 1;
+  }
+
+  .kq-logo-sm {
+    --logo-size: var(--logo-sm);
+    --logo-max-width: 12rem;
+  }
+
+  .kq-logo-md {
+    --logo-size: var(--logo-md);
+    --logo-max-width: min(52vw, 14rem);
+  }
+
+  .kq-logo-lg {
+    --logo-size: var(--logo-lg);
+    --logo-max-width: min(66vw, 18rem);
+  }
+
+  .kq-logo-xl {
+    --logo-size: var(--logo-xl);
+    --logo-max-width: min(72vw, 22rem);
+  }
+
+  /*
+   * The application bar is the one row that also carries the main navigation,
+   * which appears at 768px. In that band the full-size mark would push the
+   * links out of the row, so it steps down one notch — still larger than it
+   * was — and returns to --logo-md from 1024px up, where there is room again.
+   */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .kq-app-bar .kq-logo {
+      --logo-size: var(--logo-sm);
+    }
   }
 
   /*
