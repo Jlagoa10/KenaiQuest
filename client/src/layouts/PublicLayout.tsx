@@ -24,7 +24,7 @@ export function PublicLayout() {
         style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--bg-surface)' }}
       >
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 text-center sm:px-6">
-          <Logo height={28} />
+          <Logo size="sm" />
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
             Transforme suas metas diárias em artes colecionáveis do Kenai.
           </p>

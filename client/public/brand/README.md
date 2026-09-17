@@ -27,6 +27,9 @@ client/public/brand/
 
 O componente `Logo` (`client/src/components/brand/Logo.tsx`) usa
 `LogoSF.png` por padrão e preserva a proporção original com `width: auto`.
+Cada tela escolhe um dos quatro tamanhos (`sm`, `md`, `lg`, `xl`) em vez de
+passar pixels; as alturas ficam nas variáveis `--logo-*` de
+`client/src/styles/theme.css`, que também reduzem a escala inteira no celular.
 
 As duas imagens de fundo são usadas apenas por CSS, pelas classes
 `.kq-photo-bg` (autenticação) e `.kq-hero-bg` (hero da página inicial), em

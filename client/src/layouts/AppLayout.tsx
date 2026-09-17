@@ -31,12 +31,12 @@ export function AppLayout() {
       </a>
 
       <header
-        className="sticky top-0 z-30 border-b"
+        className="kq-app-bar sticky top-0 z-30 border-b"
         style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="kq-topbar-inner mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link to="/dashboard" className="shrink-0" aria-label="Kenai Quest, ir para o dashboard">
-            <Logo height={34} />
+            <Logo size="md" />
           </Link>
 
           <DesktopNav isAdmin={isAdmin} />
