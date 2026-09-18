@@ -5,7 +5,7 @@ import request from 'supertest';
 import type { Rarity } from '@kenai/shared';
 import { pool } from '../database/pool.js';
 import { getStorageProvider } from '../storage/index.js';
-import { createApp } from '../app.js';
+import { createApp } from '../createApp.js';
 import { hashPassword } from '../services/authService.js';
 import * as userRepository from '../repositories/userRepository.js';
 import * as artworkRepository from '../repositories/artworkRepository.js';
