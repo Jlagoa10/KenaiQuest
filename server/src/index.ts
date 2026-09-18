@@ -1,4 +1,4 @@
-import { createApp } from './app.js';
+import { createApp } from './createApp.js';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 import { closePool, pingDatabase } from './database/pool.js';
