@@ -19,11 +19,33 @@ client/public/brand/
 
 | Arquivo | Onde aparece | Servido em |
 |---|---|---|
-| `LogoSF.png` | navegação, autenticação, dashboard, rodapé, admin, favicon | `/brand/LogoSF.png` |
-| `LogoCF.png` | lugares que pedem uma versão contida, com fundo | `/brand/LogoCF.png` |
+| `LogoSF.png` | navegação, autenticação, dashboard, rodapé, admin | `/brand/LogoSF.png` |
+| `LogoCF.png` | lugares que pedem uma versão contida, com fundo; origem dos ícones do site/app | `/brand/LogoCF.png` |
 | `background.png` | login e cadastro | `/brand/background.png` |
 | `background2.jpg` | topo (hero) da página inicial | `/brand/background2.jpg` |
 | `Kenai/KenPraia.png` | arte inicial cadastrada pelo `npm run seed` | enviada ao storage |
+
+## Ícones do site e do app
+
+Os ícones de favicon e de "Adicionar à Tela de Início" ficam em
+`client/public/icons/` (mais `client/public/favicon.ico`) e são **derivados do
+`LogoCF.png`** — a logo não é redesenhada nem recolorida. A geração apenas
+remove a margem branca vazia em volta, centraliza a logo num quadrado pintado
+com o mesmo branco do original e reduz a escala, preservando a proporção:
+
+```
+client/public/favicon.ico                    16/32/48/64 px
+client/public/icons/favicon-16.png
+client/public/icons/favicon-32.png
+client/public/icons/apple-touch-icon-180.png Apple Touch Icon (iOS)
+client/public/icons/icon-192.png             manifest
+client/public/icons/icon-512.png             manifest
+client/public/icons/icon-maskable-512.png    manifest (`purpose: maskable`)
+```
+
+O manifesto fica em `client/public/site.webmanifest` e as tags correspondentes
+em `client/index.html`. Se o `LogoCF.png` oficial for substituído, regenere os
+ícones a partir dele em vez de editá-los à mão.
 
 O componente `Logo` (`client/src/components/brand/Logo.tsx`) usa
 `LogoSF.png` por padrão e preserva a proporção original com `width: auto`.
