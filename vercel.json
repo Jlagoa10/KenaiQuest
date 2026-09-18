@@ -13,7 +13,8 @@
     },
     "backend": {
       "root": "server/",
-      "framework": "express"
+      "framework": "express",
+      "entrypoint": "app.mjs"
     }
   },
   "rewrites": [
