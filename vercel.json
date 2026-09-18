@@ -14,7 +14,8 @@
     "backend": {
       "root": "server/",
       "runtime": "node",
-      "entrypoint": "app.mjs"
+      "entrypoint": "app.mjs",
+      "buildCommand": "npm run build && rm -f dist/index.js dist/index.js.map"
     }
   },
   "rewrites": [
