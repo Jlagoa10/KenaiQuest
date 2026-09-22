@@ -1,4 +1,4 @@
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 
 /** 256 bits of entropy, URL-safe. Used for refresh tokens. */
 export function generateOpaqueToken(): string {
@@ -24,4 +24,13 @@ export function safeEquals(a: string, b: string): boolean {
 /** Short deterministic digest used as a cache-busting image version. */
 export function shortHash(input: string): string {
   return createHash('sha256').update(input).digest('hex').slice(0, 16);
+}
+
+/** Uniformly random string over `alphabet` (no modulo bias: randomInt is exact). */
+export function randomCode(alphabet: string, length: number): string {
+  let code = '';
+  for (let index = 0; index < length; index += 1) {
+    code += alphabet[randomInt(alphabet.length)];
+  }
+  return code;
 }

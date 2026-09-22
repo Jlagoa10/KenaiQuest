@@ -2,6 +2,9 @@ import type {
   ArtworkRecord,
   CollectibleRecord,
   CollectibleWithRelations,
+  CompetitionParticipantRecord,
+  CompetitionRecord,
+  CompetitionResultRecord,
   GoalDayRecord,
   GoalRecord,
   RewardRuleRecord,
@@ -83,6 +86,7 @@ export function mapCollectible(row: Row): CollectibleRecord {
     earnedByUserId: row.earned_by_user_id,
     artworkId: row.artwork_id,
     sourceGoalId: row.source_goal_id,
+    sourceCompetitionId: row.source_competition_id ?? null,
     goalTitle: row.goal_title,
     totalPieces: row.total_pieces,
     piecesObtained: row.pieces_obtained,
@@ -132,5 +136,45 @@ export function mapTradeOffer(row: Row): TradeOfferRecord {
     message: row.message,
     createdAt: row.created_at,
     resolvedAt: row.resolved_at,
+  };
+}
+
+export function mapCompetition(row: Row): CompetitionRecord {
+  return {
+    id: row.id,
+    name: row.name,
+    creatorId: row.creator_id,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    timezone: row.timezone,
+    inviteCode: row.invite_code,
+    finalizedAt: row.finalized_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function mapCompetitionParticipant(row: Row): CompetitionParticipantRecord {
+  return {
+    competitionId: row.competition_id,
+    userId: row.user_id,
+    userName: row.user_name,
+    userTimezone: row.user_timezone,
+    joinedAt: row.joined_at,
+  };
+}
+
+export function mapCompetitionResult(row: Row): CompetitionResultRecord {
+  return {
+    competitionId: row.competition_id,
+    userId: row.user_id,
+    userName: row.user_name,
+    position: row.position,
+    completedDays: row.completed_days,
+    scheduledDays: row.scheduled_days,
+    scoreBasisPoints: row.score_basis_points,
+    rewardRarity: row.reward_rarity,
+    collectibleId: row.collectible_id,
+    rewardedAt: row.rewarded_at,
   };
 }

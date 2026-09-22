@@ -130,3 +130,19 @@ export async function selectReward(
 
   return { artwork, rarity, ruleId: rule?.id ?? null };
 }
+
+/**
+ * Draws an active artwork of an exact rarity — the competition prize path.
+ *
+ * Unlike selectReward there is no fallback to another rarity: the rarity IS the
+ * prize a ranking earned, so silently substituting it would be wrong. Returns
+ * null when that pool is empty; the caller keeps the prize pending and mints it
+ * once an artwork of that rarity exists.
+ */
+export async function selectArtworkForRarity(
+  params: { rarity: Rarity; random?: RandomSource },
+  db?: Queryable,
+): Promise<ArtworkRecord | null> {
+  const pool = await artworkRepository.findActiveArtworksByRarity(params.rarity, db);
+  return pickOne(pool, params.random) ?? null;
+}

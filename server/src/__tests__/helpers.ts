@@ -33,7 +33,8 @@ export async function migrateTestDatabase(): Promise<void> {
  */
 export async function resetDatabase(): Promise<void> {
   await pool.query(`
-    TRUNCATE trades, trade_offers, collectibles, goal_days, goals,
+    TRUNCATE competition_results, competition_participants, competitions,
+             trades, trade_offers, collectibles, goal_days, goals,
              artworks, refresh_tokens, users
     RESTART IDENTITY CASCADE
   `);

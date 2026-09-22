@@ -5,3 +5,4 @@ export * from './goal.js';
 export * from './artwork.js';
 export * from './rewardRule.js';
 export * from './trade.js';
+export * from './competition.js';

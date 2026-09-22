@@ -38,6 +38,7 @@ export function toCollectibleDto(collectible: CollectibleWithRelations): Collect
     imageAspectRatio: collectible.artworkWidth / collectible.artworkHeight,
     imageVersion: buildImageVersion(collectible),
     ownedPieceIndexes: collectible.ownedPieceIndexes,
+    sourceCompetitionId: collectible.sourceCompetitionId,
   };
 }
 

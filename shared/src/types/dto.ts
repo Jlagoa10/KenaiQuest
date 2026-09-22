@@ -1,3 +1,4 @@
+import type { CompetitionStatus } from '../constants/competitions.js';
 import type { GoalDayStatus, GoalStatus } from '../constants/goals.js';
 import type { Rarity } from '../constants/rarity.js';
 import type { TradeOfferStatus } from '../constants/trades.js';
@@ -123,6 +124,8 @@ export interface CollectibleDto {
   imageVersion: string;
   /** Frozen at minting. Anything not listed here is a permanent hole. */
   ownedPieceIndexes: number[];
+  /** Set when the copy was a competition prize rather than a goal's artwork. */
+  sourceCompetitionId: string | null;
 }
 
 export interface CollectibleDetailDto extends CollectibleDto {
@@ -218,6 +221,89 @@ export interface AdminStatsDto {
   collectibles: number;
   pendingTrades: number;
   completedTrades: number;
+}
+
+export interface CompetitionParticipantDto {
+  userId: string;
+  name: string;
+  joinedAt: string;
+  isCreator: boolean;
+  isMe: boolean;
+}
+
+/**
+ * One row of the ranking. Every number here is computed on the server from
+ * `goal_days` (live) or read from the stored final result (finished). Nothing
+ * the client sends ever feeds into it.
+ */
+export interface CompetitionRankingEntryDto {
+  userId: string;
+  name: string;
+  isMe: boolean;
+  /** Shared by tied participants. */
+  position: number;
+  /** Completion with two decimals — exactly the value the ranking compares. */
+  scorePercent: number;
+  completedDays: number;
+  scheduledDays: number;
+  /** The rarity this position stands for. */
+  positionRarity: Rarity | null;
+  /** What is (live: would be) awarded; null when the participant earns nothing. */
+  rewardRarity: Rarity | null;
+  /** Finished competitions only: the minted Kenai. Present for your own row. */
+  rewardStatus: 'NONE' | 'PENDING' | 'AWARDED';
+  collectibleId?: string;
+}
+
+export interface CompetitionSummaryDto {
+  id: string;
+  name: string;
+  startDate: IsoDate;
+  endDate: IsoDate;
+  durationDays: number;
+  status: CompetitionStatus;
+  participantCount: number;
+  maxParticipants: number;
+  isCreator: boolean;
+  /** Your current (or final) position, and the rarity it stands for. */
+  myPosition: number | null;
+  myScorePercent: number | null;
+  myRewardRarity: Rarity | null;
+  createdAt: string;
+  finalizedAt: string | null;
+}
+
+export interface CompetitionDetailDto extends CompetitionSummaryDto {
+  inviteCode: string;
+  creatorName: string | null;
+  participants: CompetitionParticipantDto[];
+  ranking: CompetitionRankingEntryDto[];
+  /** True once the result is stored and can no longer change. */
+  rankingIsFinal: boolean;
+  /** False while fewer than the minimum number of participants take part. */
+  rewardsEnabled: boolean;
+  /** First date on which the final result is locked (after the Ontem window). */
+  resultsDate: IsoDate;
+  /** Whether the invitation still works: upcoming and not full. */
+  acceptingParticipants: boolean;
+}
+
+/** What someone holding an invitation sees before joining. */
+export interface CompetitionInvitePreviewDto {
+  id: string;
+  name: string;
+  startDate: IsoDate;
+  endDate: IsoDate;
+  durationDays: number;
+  status: CompetitionStatus;
+  creatorName: string | null;
+  participantNames: string[];
+  participantCount: number;
+  maxParticipants: number;
+  isParticipant: boolean;
+  canJoin: boolean;
+  /** Why joining is not possible, in Portuguese, when canJoin is false. */
+  joinBlockedReason: string | null;
 }
 
 export interface ApiErrorBody {
