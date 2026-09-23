@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import type { CollectibleDto } from '@kenai/shared';
 import { buildPieceStates, formatIsoDatePtBr } from '@kenai/shared';
-import { Award, Repeat2 } from 'lucide-react';
+import { Award, Repeat2, Trophy } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { RarityBadge } from '../ui/RarityBadge';
 import { ProgressBar } from '../ui/ProgressBar';
@@ -38,6 +38,14 @@ export function CollectibleCard({
         <div className="min-w-0">
           <h3 className="truncate text-base font-semibold">{collectible.artwork.name}</h3>
           <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--text-muted)' }}>
+            {collectible.sourceCompetitionId && (
+              <Trophy
+                size={11}
+                className="mr-1 inline-block align-[-1px]"
+                style={{ color: 'var(--brand-accent)' }}
+                aria-label="Prêmio de competição:"
+              />
+            )}
             {collectible.goalTitle}
           </p>
         </div>

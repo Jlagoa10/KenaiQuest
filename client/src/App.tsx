@@ -18,6 +18,10 @@ import { GoalDetailPage } from './pages/GoalDetailPage';
 import { CollectionPage } from './pages/CollectionPage';
 import { CollectibleDetailPage } from './pages/CollectibleDetailPage';
 import { TradesPage } from './pages/TradesPage';
+import { CompetitionsPage } from './pages/CompetitionsPage';
+import { NewCompetitionPage } from './pages/NewCompetitionPage';
+import { CompetitionDetailPage } from './pages/CompetitionDetailPage';
+import { JoinCompetitionPage } from './pages/JoinCompetitionPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
 import { AdminArtworksPage } from './pages/admin/AdminArtworksPage';
@@ -50,6 +54,10 @@ export function App() {
           <Route path="colecao" element={<CollectionPage />} />
           <Route path="colecao/:id" element={<CollectibleDetailPage />} />
           <Route path="trocas" element={<TradesPage />} />
+          <Route path="competicoes" element={<CompetitionsPage />} />
+          <Route path="competicoes/nova" element={<NewCompetitionPage />} />
+          <Route path="competicoes/convite/:code" element={<JoinCompetitionPage />} />
+          <Route path="competicoes/:id" element={<CompetitionDetailPage />} />
           <Route path="perfil" element={<ProfilePage />} />
 
           <Route element={<RequireAdmin />}>

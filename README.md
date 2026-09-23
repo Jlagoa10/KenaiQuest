@@ -270,6 +270,7 @@ nada específico de provedor neles.
 | `001_initial_schema` | enums, tabelas, índices, constraints e triggers |
 | `002_default_reward_rules` | configuração inicial de recompensa por duração |
 | `003_refresh_token_rotation_grace` | motivo da revogação do token, para separar corrida de reuso |
+| `004_competitions` | competições, participantes (máx. 5), resultado final imutável e origem dos prêmios em `collectibles` |
 
 As regras de recompensa vêm como **migração**, não como seed, porque são
 configuração de sistema: um banco de produção recém-criado já consegue sortear
