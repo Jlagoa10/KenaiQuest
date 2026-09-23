@@ -83,7 +83,7 @@
 
   /* Veils laid over the official background photographs. The images themselves
      are never touched — only what sits above them changes between the themes.
-     --photo-veil covers the global application background; the --hero-veil pair covers
+     --photo-veil covers the authentication screens; the --hero-veil pair covers
      the landing hero, where the photo is meant to stay far more present. */
   --photo-veil: linear-gradient(180deg, rgb(247 249 252 / 0.58) 0%, rgb(247 249 252 / 0.74) 100%);
   --hero-veil: linear-gradient(180deg, rgb(247 249 252 / 0.72) 0%, rgb(247 249 252 / 0.86) 100%);
@@ -206,37 +206,6 @@
     overflow-x: hidden;
   }
 
-  /*
-   * The application background — one layer, for every route.
-   *
-   * The official photograph (used exactly as supplied: `cover` keeps its aspect
-   * ratio, `no-repeat` paints it once) under the theme's readability veil. It is
-   * fixed to the viewport rather than stretched over the document, so however
-   * tall a page is, every scroll position shows the same continuous background
-   * — and it avoids `background-attachment: fixed`, which iOS Safari ignores.
-   * z-index -1 keeps it behind all content; --bg-app shows only while the file
-   * is loading. Layouts and pages must not paint an opaque full-width fill over
-   * it: chrome uses .kq-chrome, content sits on cards.
-   */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-color: var(--bg-app);
-    background-image: var(--photo-veil), url('/brand/background.png');
-    background-size: cover;
-    background-position: var(--photo-focus);
-    background-repeat: no-repeat;
-  }
-
-  @media (max-width: 640px) {
-    body::before {
-      background-position: var(--photo-focus-sm);
-    }
-  }
-
   /* Visible focus for keyboard users on every interactive element. */
   :focus-visible {
     outline: 2px solid var(--focus-ring);
@@ -269,34 +238,70 @@
   }
 
   /*
-   * Chrome over the global background: the headers, the footer and the mobile
-   * tab bar. A translucent, blurred surface — lighter than the auth card's — so
-   * the background visibly continues behind them instead of stopping at a
-   * solid band; the hairline borders and shadows still draw the separation.
-   * The first declaration is the fallback where color-mix() is unsupported.
-   */
-  .kq-chrome {
-    background-color: var(--surface-translucent);
-    background-color: color-mix(in srgb, var(--bg-surface) 70%, transparent);
-    backdrop-filter: blur(14px) saturate(115%);
-    -webkit-backdrop-filter: blur(14px) saturate(115%);
-  }
-
-  /*
-   * Public top bar. `position: relative` plus a positive z-index keeps it (and
-   * its shadow) above the page content that follows it.
+   * Public top bar.
+   *
+   * It carries its own opaque surface so the header reads as chrome sitting
+   * above the page rather than as part of the background photograph behind it.
+   * `position: relative` plus a positive z-index keeps it above the auth
+   * screen's `fixed`, `-z-10` photo layer, which still covers the viewport
+   * underneath; the hairline border and the soft shadow are what draw the
+   * separation without adding any new colour.
    */
   .kq-topbar {
     position: relative;
     z-index: 10;
+    background-color: var(--bg-surface);
     border-bottom: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-topbar);
   }
 
-  /* The bar's own row. Its height is the token, so layouts below can line up
-     with it without either side hard-coding a number. */
+  /*
+   * Safe areas. With viewport-fit=cover and the translucent iOS status bar,
+   * the page extends under the notch/status bar and the home indicator. Top
+   * bars pad their surface down by the top inset (so the bar's colour fills
+   * the status-bar area and its content starts below it) and every bar keeps
+   * its content clear of the side insets in landscape. All insets are 0 on
+   * devices without them, so nothing moves elsewhere.
+   */
+  .kq-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .kq-safe-x {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Page content: clears the fixed mobile tab bar plus the home indicator. */
+  .kq-main-bottom {
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+  }
+
+  @media (min-width: 768px) {
+    .kq-main-bottom {
+      padding-bottom: 3rem;
+    }
+  }
+
+  /* The bar's own row. Its height is the token, so the photo layer below can
+     line up with it without either side hard-coding a number. */
   .kq-topbar-inner {
     height: var(--topbar-height);
+  }
+
+  /*
+   * The authentication screens' photo layer.
+   *
+   * Fixed to the viewport, so the image is never stretched and always fills the
+   * screen — including after the header has scrolled away, where an inset layer
+   * would leave an empty band at the top. While the bar is still in view its
+   * own opaque surface covers this layer, so the photograph reads as starting
+   * below the header without the header itself being pinned there.
+   */
+  .kq-photo-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
   }
 
   /*
@@ -338,6 +343,23 @@
   }
 
   /*
+   * Official Kenai Quest background photograph.
+   *
+   * Used exactly as supplied: one single file, referenced by URL, never
+   * recoloured and never stretched. `cover` preserves the image's own aspect
+   * ratio at every viewport size, `center` keeps the subject in frame and
+   * `no-repeat` means it is painted once. --bg-app shows through only while the
+   * file is still loading.
+   */
+  .kq-photo-bg {
+    background-color: var(--bg-app);
+    background-image: url('/brand/background.png');
+    background-size: cover;
+    background-position: var(--photo-focus);
+    background-repeat: no-repeat;
+  }
+
+  /*
    * Landing hero photograph — the second official image, referenced straight
    * from /public and shown under a much lighter veil than the auth screens, so
    * it keeps its impact instead of being washed out.
@@ -357,9 +379,25 @@
    * place to shift either one.
    */
   @media (max-width: 640px) {
+    .kq-photo-bg {
+      background-position: var(--photo-focus-sm);
+    }
+
     .kq-hero-bg {
       background-position: var(--hero-focus-sm);
     }
+  }
+
+  /*
+   * The readability veil above the photo. Theme-driven, so light and dark mode
+   * each get their own treatment from the same image.
+   */
+  .kq-photo-veil::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--photo-veil);
+    pointer-events: none;
   }
 
   /*
@@ -396,8 +434,7 @@
 
   /* Browsers without backdrop-filter get the plain opaque surface instead. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .kq-auth-card,
-    .kq-chrome {
+    .kq-auth-card {
       background-color: var(--bg-surface);
     }
   }

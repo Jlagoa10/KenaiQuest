@@ -21,8 +21,7 @@ export function AppLayout() {
   }
 
   return (
-    // No fill here: the global background (body::before) shows behind every page.
-    <div className="min-h-dvh">
+    <div className="min-h-dvh" style={{ backgroundColor: 'var(--bg-app)' }}>
       <a
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2"
@@ -32,8 +31,8 @@ export function AppLayout() {
       </a>
 
       <header
-        className="kq-chrome sticky top-0 z-30 border-b"
-        style={{ borderColor: 'var(--border-subtle)' }}
+        className="kq-safe-top kq-safe-x sticky top-0 z-30 border-b"
+        style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
       >
         <div className="kq-topbar-inner mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link to="/dashboard" className="shrink-0" aria-label="Kenai Quest, ir para o dashboard">
@@ -65,9 +64,12 @@ export function AppLayout() {
       </header>
 
       {/* Bottom padding clears the fixed mobile navigation bar. */}
-      <main id="conteudo" className="mx-auto max-w-7xl px-4 pb-28 pt-6 sm:px-6 md:pb-12">
-        <Outlet />
-      </main>
+      {/* Side insets live on a wrapper so main's own px-4/sm:px-6 stay intact. */}
+      <div className="kq-safe-x">
+        <main id="conteudo" className="kq-main-bottom mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+          <Outlet />
+        </main>
+      </div>
 
       <MobileNav isAdmin={isAdmin} />
     </div>

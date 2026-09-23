@@ -54,11 +54,14 @@ export function MobileNav({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <nav
-      className="kq-chrome fixed inset-x-0 bottom-0 z-40 border-t md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t md:hidden"
       style={{
+        backgroundColor: 'var(--bg-surface)',
         borderColor: 'var(--border-subtle)',
-        // Keeps the bar clear of the iOS home indicator.
+        // Keeps the bar clear of the iOS home indicator and, in landscape, the notch.
         paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
       }}
       aria-label="Navegação principal"
     >

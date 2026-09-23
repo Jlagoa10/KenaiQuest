@@ -8,14 +8,19 @@ import { Logo } from '../components/brand/Logo';
  * they render the very same PublicHeader the landing page does. What this
  * layout owns is everything below that bar, in the intended order:
  *
- *   Kenai Quest logo → authentication card → form
+ *   background.png → Kenai Quest logo → authentication card → form
  *
- * The photograph behind it is not this layout's either: it is the global
- * application background (body::before in theme.css), the same on every route.
+ * The photo layer is fixed to the viewport, so the image is never stretched and
+ * always fills the screen: while the bar is on screen its opaque surface covers
+ * the top of the layer, and once the bar has scrolled away the photograph
+ * simply continues to the top edge instead of leaving an empty band there.
  */
 export function AuthLayout() {
   return (
     <div className="relative flex min-h-[calc(100dvh-var(--topbar-height))] w-full flex-col justify-center px-5 py-12 sm:px-6">
+      {/* Decorative only: the photograph carries no information of its own. */}
+      <div className="kq-photo-bg kq-photo-veil kq-photo-layer" aria-hidden="true" />
+
       <div className="mx-auto flex w-full max-w-md flex-col">
         <div className="mb-7 flex flex-col items-center text-center">
           <Link to="/" aria-label="Kenai Quest, página inicial">
