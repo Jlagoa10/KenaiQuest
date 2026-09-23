@@ -117,7 +117,10 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="border-y py-16 sm:py-20" style={{ borderColor: 'var(--border-subtle)' }}>
+      <section
+        className="border-y py-16 sm:py-20"
+        style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+      >
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-semibold sm:text-3xl">Como funciona</h2>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
