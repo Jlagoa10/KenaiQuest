@@ -64,3 +64,11 @@ export const uploadLimiter = rateLimit({
   limit: 60,
   handler: buildHandler('Muitos envios de arquivo. Tente novamente mais tarde.'),
 });
+
+/** Invitation lookups and joins: generous for people, useless for guessing codes. */
+export const inviteLimiter = rateLimit({
+  ...shared,
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  handler: buildHandler('Muitas tentativas com convites. Tente novamente em alguns minutos.'),
+});

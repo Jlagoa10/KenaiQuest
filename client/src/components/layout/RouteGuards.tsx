@@ -41,11 +41,24 @@ export function RequireAdmin() {
   return <Outlet />;
 }
 
-/** Keeps a signed-in user away from the login and signup screens. */
+/**
+ * Keeps a signed-in user away from the login and signup screens.
+ *
+ * Signing in flips isAuthenticated before the login form can navigate, so this
+ * guard is what actually performs the post-login redirect. It honours the path
+ * RequireAuth remembered — that is how an invitation link opened while signed
+ * out still reaches the invitation — and only ever an in-app path.
+ */
 export function RedirectIfAuthenticated() {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) return <FullPageLoader />;
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) {
+    const from = (location.state as { from?: unknown } | null)?.from;
+    const target =
+      typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') ? from : '/dashboard';
+    return <Navigate to={target} replace />;
+  }
   return <Outlet />;
 }

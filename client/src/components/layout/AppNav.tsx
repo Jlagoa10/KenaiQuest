@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Images, Repeat2, User, ShieldCheck, Target } from 'lucide-react';
+import { LayoutDashboard, Images, Repeat2, User, ShieldCheck, Target, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -15,6 +15,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/metas', label: 'Metas', icon: Target },
   { to: '/colecao', label: 'Coleção', icon: Images },
   { to: '/trocas', label: 'Trocas', icon: Repeat2 },
+  { to: '/competicoes', label: 'Competições', icon: Trophy },
   { to: '/perfil', label: 'Perfil', icon: User },
   { to: '/admin', label: 'Admin', icon: ShieldCheck, adminOnly: true },
 ];

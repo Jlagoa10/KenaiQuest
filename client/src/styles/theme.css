@@ -152,7 +152,7 @@
   --topbar-height: 4rem;
 
   --logo-sm: 2.125rem;  /* 34px — footer (28px × 1.2) */
-  --logo-md: 2.5rem;    /* 40px — top bars (34px × 1.2) */
+  --logo-md: 3rem;      /* 48px — top bars (40px × 1.2), still inside the 64px bar */
   --logo-lg: 3.25rem;   /* 52px — page marks (44px × 1.2) */
   --logo-xl: 4.25rem;   /* 68px — authentication (56px × 1.2) */
 }

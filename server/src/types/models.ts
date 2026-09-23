@@ -77,6 +77,7 @@ export interface CollectibleRecord {
   earnedByUserId: string | null;
   artworkId: string;
   sourceGoalId: string | null;
+  sourceCompetitionId: string | null;
   goalTitle: string;
   totalPieces: number;
   piecesObtained: number;
@@ -124,4 +125,47 @@ export interface TradeOfferRecord {
   message: string | null;
   createdAt: Date;
   resolvedAt: Date | null;
+}
+
+export interface CompetitionRecord {
+  id: string;
+  name: string;
+  creatorId: string | null;
+  startDate: string;
+  endDate: string;
+  timezone: string;
+  inviteCode: string;
+  finalizedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CompetitionParticipantRecord {
+  competitionId: string;
+  userId: string;
+  userName: string;
+  userTimezone: string;
+  joinedAt: Date;
+}
+
+export interface CompetitionResultRecord {
+  competitionId: string;
+  userId: string;
+  userName: string;
+  position: number;
+  completedDays: number;
+  scheduledDays: number;
+  scoreBasisPoints: number;
+  rewardRarity: Rarity | null;
+  collectibleId: string | null;
+  rewardedAt: Date | null;
+}
+
+/** A participant's goal day, joined with what the competition scorer needs. */
+export interface CompetitionScoringDayRecord {
+  userId: string;
+  dayDate: string;
+  status: GoalDayStatus;
+  goalStatus: GoalStatus;
+  goalCancelledAt: Date | null;
 }

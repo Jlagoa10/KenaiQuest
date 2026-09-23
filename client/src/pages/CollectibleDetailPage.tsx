@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Award, Repeat2, Target } from 'lucide-react';
+import { ArrowLeft, Award, Repeat2, Target, Trophy } from 'lucide-react';
 import {
   RARITY_LABELS,
   TRADE_ELIGIBILITY_PERCENT,
@@ -154,7 +154,10 @@ export function CollectibleDetailPage() {
                 <Row label="Peças perdidas" value={String(collectible.piecesMissed)} />
                 <Row label="Raridade" value={RARITY_LABELS[collectible.artwork.rarity]} />
                 <Row label="Conquistado em" value={formatIsoDatePtBr(collectible.obtainedAt.slice(0, 10))} />
-                <Row label="Meta de origem" value={collectible.goalTitle} />
+                <Row
+                  label={collectible.sourceCompetitionId ? 'Competição de origem' : 'Meta de origem'}
+                  value={collectible.goalTitle}
+                />
                 <Row label="Dono atual" value={collectible.owner.name} />
                 {collectible.earnedByName !== collectible.owner.name && (
                   <Row label="Conquistado por" value={collectible.earnedByName} />
@@ -192,6 +195,14 @@ export function CollectibleDetailPage() {
                 )}
               </CardBody>
             </Card>
+          )}
+
+          {collectible.sourceCompetitionId && isOwner && (
+            <Link to={`/competicoes/${collectible.sourceCompetitionId}`}>
+              <Button variant="secondary" fullWidth icon={<Trophy size={16} />}>
+                Ver competição de origem
+              </Button>
+            </Link>
           )}
 
           {collectible.sourceGoalId && isOwner && (

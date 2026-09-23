@@ -4,6 +4,7 @@ import { userRoutes } from './userRoutes.js';
 import { goalRoutes } from './goalRoutes.js';
 import { collectibleRoutes } from './collectibleRoutes.js';
 import { tradeRoutes } from './tradeRoutes.js';
+import { competitionRoutes } from './competitionRoutes.js';
 import { adminRoutes } from './admin/index.js';
 
 export const apiRoutes = Router();
@@ -17,4 +18,5 @@ apiRoutes.use('/users', userRoutes);
 apiRoutes.use('/goals', goalRoutes);
 apiRoutes.use('/collectibles', collectibleRoutes);
 apiRoutes.use('/trades', tradeRoutes);
+apiRoutes.use('/competitions', competitionRoutes);
 apiRoutes.use('/admin', adminRoutes);

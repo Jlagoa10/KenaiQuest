@@ -6,7 +6,8 @@ import type { CollectibleRecord, CollectibleWithRelations } from '../types/model
 import { mapCollectible, mapCollectibleWithRelations } from './mappers.js';
 
 const BASE_COLUMNS = `
-  c.id, c.owner_id, c.earned_by_user_id, c.artwork_id, c.source_goal_id, c.goal_title,
+  c.id, c.owner_id, c.earned_by_user_id, c.artwork_id, c.source_goal_id,
+  c.source_competition_id, c.goal_title,
   c.total_pieces, c.pieces_obtained, c.owned_piece_indexes, c.completion_percent,
   c.is_perfect, c.is_listed_for_trade, c.obtained_at
 `;
@@ -44,7 +45,9 @@ export async function createCollectible(
     ownerId: string;
     earnedByUserId: string;
     artworkId: string;
-    sourceGoalId: string;
+    /** Exactly one source: the goal that revealed it, or the competition that awarded it. */
+    sourceGoalId: string | null;
+    sourceCompetitionId?: string | null;
     goalTitle: string;
     totalPieces: number;
     piecesObtained: number;
@@ -54,15 +57,16 @@ export async function createCollectible(
 ): Promise<CollectibleRecord> {
   const result = await db.query(
     `INSERT INTO collectibles
-       (owner_id, earned_by_user_id, artwork_id, source_goal_id, goal_title,
-        total_pieces, pieces_obtained, owned_piece_indexes)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8::int[])
+       (owner_id, earned_by_user_id, artwork_id, source_goal_id, source_competition_id,
+        goal_title, total_pieces, pieces_obtained, owned_piece_indexes)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::int[])
      RETURNING ${BASE_COLUMNS.replace(/c\./g, '')}`,
     [
       params.ownerId,
       params.earnedByUserId,
       params.artworkId,
       params.sourceGoalId,
+      params.sourceCompetitionId ?? null,
       params.goalTitle,
       params.totalPieces,
       params.piecesObtained,

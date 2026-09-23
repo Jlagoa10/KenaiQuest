@@ -44,6 +44,8 @@ export function useCompleteGoalDay(goalId: string) {
       void queryClient.invalidateQueries({ queryKey: goalKeys.list() });
       // A finished goal mints a collectible, so the collection is stale too.
       void queryClient.invalidateQueries({ queryKey: ['collectibles'] });
+      // Competition rankings are scored from these same days.
+      void queryClient.invalidateQueries({ queryKey: ['competitions'] });
     },
   });
 }
