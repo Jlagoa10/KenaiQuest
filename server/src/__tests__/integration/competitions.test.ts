@@ -159,14 +159,32 @@ suite('Competições', () => {
       const post = (body: object) =>
         request(getApp()).post('/api/competitions').set(auth(creator)).send(body);
 
-      await post({ name: 'x', startDate: addDays(today, 1), endDate: addDays(today, 8) }).expect(400);
+      await post({ name: 'x', startDate: addDays(today, 1), endDate: addDays(today, 8) }).expect(
+        400,
+      );
       // Starting today would close joining immediately.
-      const startsToday = await post({ name: 'Desafio', startDate: today, endDate: addDays(today, 7) });
+      const startsToday = await post({
+        name: 'Desafio',
+        startDate: today,
+        endDate: addDays(today, 7),
+      });
       expect(startsToday.status).toBe(400);
       expect(startsToday.body.error.code).toBe('INVALID_COMPETITION_DATES');
-      await post({ name: 'Desafio', startDate: addDays(today, 5), endDate: addDays(today, 1) }).expect(400);
-      await post({ name: 'Desafio', startDate: addDays(today, 1), endDate: addDays(today, 6) }).expect(400);
-      await post({ name: 'Desafio', startDate: addDays(today, 1), endDate: addDays(today, 366) }).expect(400);
+      await post({
+        name: 'Desafio',
+        startDate: addDays(today, 5),
+        endDate: addDays(today, 1),
+      }).expect(400);
+      await post({
+        name: 'Desafio',
+        startDate: addDays(today, 1),
+        endDate: addDays(today, 6),
+      }).expect(400);
+      await post({
+        name: 'Desafio',
+        startDate: addDays(today, 1),
+        endDate: addDays(today, 366),
+      }).expect(400);
       await post({ name: 'Desafio', startDate: 'amanhã', endDate: addDays(today, 8) }).expect(400);
     });
   });
@@ -226,7 +244,10 @@ suite('Competições', () => {
       const mine = await createCompetition(alice, { name: 'Da Alice' });
       await createCompetition(bruno, { name: 'Do Bruno' });
 
-      const response = await request(getApp()).get('/api/competitions').set(auth(alice)).expect(200);
+      const response = await request(getApp())
+        .get('/api/competitions')
+        .set(auth(alice))
+        .expect(200);
       expect(response.body.competitions.map((item: { id: string }) => item.id)).toEqual([mine.id]);
     });
   });
@@ -255,7 +276,9 @@ suite('Competições', () => {
       const joined = await join(guest, ` ${competition.inviteCode.toLowerCase()} `).expect(201);
       expect(joined.body.competition.participantCount).toBe(2);
       expect(
-        joined.body.competition.participants.map((participant: { name: string }) => participant.name),
+        joined.body.competition.participants.map(
+          (participant: { name: string }) => participant.name,
+        ),
       ).toEqual(['Criadora', 'Convidado']);
     });
 
@@ -263,7 +286,10 @@ suite('Competições', () => {
       const guest = await authedUser();
       await join(guest, 'ZZZZZZZZ').expect(404);
       await join(guest, '0000').expect(400);
-      await request(getApp()).get('/api/competitions/invite/nao-existe').set(auth(guest)).expect(404);
+      await request(getApp())
+        .get('/api/competitions/invite/nao-existe')
+        .set(auth(guest))
+        .expect(404);
     });
 
     it('impede participar duas vezes, inclusive o próprio criador', async () => {
@@ -304,7 +330,9 @@ suite('Competições', () => {
       const competition = await createCompetition(creator);
       const guests = await Promise.all(Array.from({ length: 8 }, () => authedUser()));
 
-      const responses = await Promise.all(guests.map((guest) => join(guest, competition.inviteCode)));
+      const responses = await Promise.all(
+        guests.map((guest) => join(guest, competition.inviteCode)),
+      );
       expect(responses.filter((response) => response.status === 201)).toHaveLength(4);
       expect(responses.filter((response) => response.status === 409)).toHaveLength(4);
 
@@ -322,10 +350,10 @@ suite('Competições', () => {
       for (const guest of guests.slice(0, 4)) await join(guest, competition.inviteCode).expect(201);
 
       await expect(
-        pool.query('INSERT INTO competition_participants (competition_id, user_id) VALUES ($1, $2)', [
-          competition.id,
-          guests[4]?.user.id,
-        ]),
+        pool.query(
+          'INSERT INTO competition_participants (competition_id, user_id) VALUES ($1, $2)',
+          [competition.id, guests[4]?.user.id],
+        ),
       ).rejects.toThrow(/COMPETITION_FULL/);
     });
 
@@ -369,7 +397,8 @@ suite('Competições', () => {
       const pedro = await authedUser({ name: 'Pedro' });
 
       const competition = await createCompetition(joao);
-      for (const player of [lucas, maria, pedro]) await join(player, competition.inviteCode).expect(201);
+      for (const player of [lucas, maria, pedro])
+        await join(player, competition.inviteCode).expect(201);
 
       // Window [today-5, today+1]: days 1–4 of each goal are decided, day 5 is
       // "Ontem", day 6 is "Hoje", day 7 is tomorrow.
@@ -383,7 +412,9 @@ suite('Competições', () => {
       const detail = await getDetail(pedro, competition.id);
       expect(detail.status).toBe('ACTIVE');
       expect(detail.rankingIsFinal).toBe(false);
-      expect(detail.ranking.map((entry) => [entry.name, entry.position, entry.scorePercent])).toEqual([
+      expect(
+        detail.ranking.map((entry) => [entry.name, entry.position, entry.scorePercent]),
+      ).toEqual([
         ['João', 1, 100],
         ['Lucas', 2, 75],
         ['Maria', 2, 75],
@@ -396,7 +427,9 @@ suite('Competições', () => {
         // 0%: the position stands for Incomum, but nothing would be awarded.
         Pedro: [4, null],
       });
-      expect(detail.ranking.find((entry) => entry.name === 'Pedro')?.positionRarity).toBe('UNCOMMON');
+      expect(detail.ranking.find((entry) => entry.name === 'Pedro')?.positionRarity).toBe(
+        'UNCOMMON',
+      );
       expect(detail.myPosition).toBe(4);
 
       // Pedro marks today through the real goal endpoint: the ranking moves.
@@ -408,7 +441,12 @@ suite('Competições', () => {
 
       const updated = await getDetail(pedro, competition.id);
       const pedroRow = updated.ranking.find((entry) => entry.name === 'Pedro');
-      expect(pedroRow).toMatchObject({ position: 4, completedDays: 1, scheduledDays: 5, scorePercent: 20 });
+      expect(pedroRow).toMatchObject({
+        position: 4,
+        completedDays: 1,
+        scheduledDays: 5,
+        scorePercent: 20,
+      });
       expect(pedroRow?.rewardRarity).toBe('UNCOMMON');
 
       // Nothing was stored while the competition runs.
@@ -447,7 +485,9 @@ suite('Competições', () => {
       const detail = await getDetail(alice, competition.id);
       // Alice: 2 of the 4 decided days (her "Ontem" can still be claimed).
       // Bruno: his misses stay, and by cancelling he gave up "Ontem" too — 2 of 5.
-      expect(detail.ranking.map((entry) => [entry.name, entry.scorePercent, entry.position])).toEqual([
+      expect(
+        detail.ranking.map((entry) => [entry.name, entry.scorePercent, entry.position]),
+      ).toEqual([
         ['Alice', 50, 1],
         ['Bruno', 40, 2],
       ]);
@@ -477,7 +517,9 @@ suite('Competições', () => {
       expect(detail.status).toBe('ACTIVE');
       expect(detail.finalizedAt).toBeNull();
       expect(detail.resultsDate).toBe(addDays(today, 1));
-      expect(detail.ranking.map((entry) => [entry.name, entry.position, entry.scorePercent])).toEqual([
+      expect(
+        detail.ranking.map((entry) => [entry.name, entry.position, entry.scorePercent]),
+      ).toEqual([
         ['Alice', 1, 100],
         ['Bruno', 2, 83.33],
       ]);
@@ -517,10 +559,13 @@ suite('Competições', () => {
           .set(auth(player))
           .expect(200);
         const prizes = collection.body.collectibles.filter(
-          (item: { sourceCompetitionId: string | null }) => item.sourceCompetitionId === competition.id,
+          (item: { sourceCompetitionId: string | null }) =>
+            item.sourceCompetitionId === competition.id,
         );
         expect(prizes).toHaveLength(1);
-        const expected = (['LEGENDARY', 'EPIC', 'EPIC', 'UNCOMMON', 'COMMON'] as Rarity[])[index] as Rarity;
+        const expected = (['LEGENDARY', 'EPIC', 'EPIC', 'UNCOMMON', 'COMMON'] as Rarity[])[
+          index
+        ] as Rarity;
         expect(prizes[0].artwork.rarity).toBe(expected);
         expect(prizes[0].artwork.id).toBe(artworks[expected].id);
         expect(prizes[0].isPerfect).toBe(true);
@@ -547,7 +592,9 @@ suite('Competições', () => {
         const { players, competition } = await finishedCompetitionWith(completed);
         const detail = await getDetail(players[0] as Player, competition.id);
         expect(detail.ranking.map((entry) => entry.rewardRarity)).toEqual(expected);
-        expect(detail.ranking.map((entry) => entry.position)).toEqual(expected.map((_, index) => index + 1));
+        expect(detail.ranking.map((entry) => entry.position)).toEqual(
+          expected.map((_, index) => index + 1),
+        );
 
         const minted = await pool.query(
           `SELECT a.rarity FROM collectibles c JOIN artworks a ON a.id = c.artwork_id
@@ -584,14 +631,21 @@ suite('Competições', () => {
       await seedArtworkForEveryRarity();
       const { players, competition } = await finishedCompetitionWith([4, 0]);
       const detail = await getDetail(players[1] as Player, competition.id);
-      expect(rewardsByName(detail)).toEqual({ 'Jogador 1': [1, 'LEGENDARY'], 'Jogador 2': [2, null] });
+      expect(rewardsByName(detail)).toEqual({
+        'Jogador 1': [1, 'LEGENDARY'],
+        'Jogador 2': [2, null],
+      });
       expect(detail.ranking.find((entry) => entry.isMe)?.rewardStatus).toBe('NONE');
 
       const solo = await finishedCompetitionWith([7]);
       const soloDetail = await getDetail(solo.players[0] as Player, solo.competition.id);
       expect(soloDetail.status).toBe('FINISHED');
       expect(soloDetail.rewardsEnabled).toBe(false);
-      expect(soloDetail.ranking[0]).toMatchObject({ position: 1, rewardRarity: null, rewardStatus: 'NONE' });
+      expect(soloDetail.ranking[0]).toMatchObject({
+        position: 1,
+        rewardRarity: null,
+        rewardStatus: 'NONE',
+      });
       const soloPrizes = await pool.query(
         'SELECT count(*)::int AS total FROM collectibles WHERE source_competition_id = $1',
         [solo.competition.id],
@@ -605,10 +659,16 @@ suite('Competições', () => {
 
       await Promise.all(
         [...players, ...players].map((player) =>
-          request(getApp()).get(`/api/competitions/${competition.id}`).set(auth(player)).expect(200),
+          request(getApp())
+            .get(`/api/competitions/${competition.id}`)
+            .set(auth(player))
+            .expect(200),
         ),
       );
-      await request(getApp()).get('/api/competitions').set(auth(players[0] as Player)).expect(200);
+      await request(getApp())
+        .get('/api/competitions')
+        .set(auth(players[0] as Player))
+        .expect(200);
       await resolveAllCompetitions();
 
       const minted = await pool.query(
@@ -641,7 +701,10 @@ suite('Competições', () => {
       await seedArtworkForEveryRarity();
       const { players, competition } = await finishedCompetitionWith([3, 5]);
       const before = await getDetail(players[0] as Player, competition.id);
-      expect(rewardsByName(before)).toEqual({ 'Jogador 2': [1, 'LEGENDARY'], 'Jogador 1': [2, 'EPIC'] });
+      expect(rewardsByName(before)).toEqual({
+        'Jogador 2': [1, 'LEGENDARY'],
+        'Jogador 1': [2, 'EPIC'],
+      });
 
       // Later goal activity inside the old window cannot move the stored result.
       await pool.query(
@@ -654,12 +717,15 @@ suite('Competições', () => {
 
       // And the database itself refuses to rewrite it.
       await expect(
-        pool.query('UPDATE competition_results SET position = 1 WHERE competition_id = $1', [competition.id]),
-      ).rejects.toThrow(/COMPETITION_RESULT_IMMUTABLE/);
-      await expect(
-        pool.query("UPDATE competition_results SET reward_rarity = 'LEGENDARY' WHERE competition_id = $1", [
+        pool.query('UPDATE competition_results SET position = 1 WHERE competition_id = $1', [
           competition.id,
         ]),
+      ).rejects.toThrow(/COMPETITION_RESULT_IMMUTABLE/);
+      await expect(
+        pool.query(
+          "UPDATE competition_results SET reward_rarity = 'LEGENDARY' WHERE competition_id = $1",
+          [competition.id],
+        ),
       ).rejects.toThrow();
       await expect(
         pool.query('UPDATE competitions SET finalized_at = NULL WHERE id = $1', [competition.id]),
@@ -672,14 +738,21 @@ suite('Competições', () => {
       await getDetail(players[0] as Player, competition.id);
 
       // A finished competition cannot be deleted while its result exists…
-      await expect(pool.query('DELETE FROM competitions WHERE id = $1', [competition.id])).rejects.toThrow();
+      await expect(
+        pool.query('DELETE FROM competitions WHERE id = $1', [competition.id]),
+      ).rejects.toThrow();
 
       // …and even if an operator removes it entirely, the prizes stay.
-      await pool.query('DELETE FROM competition_results WHERE competition_id = $1', [competition.id]);
+      await pool.query('DELETE FROM competition_results WHERE competition_id = $1', [
+        competition.id,
+      ]);
       await pool.query('DELETE FROM competitions WHERE id = $1', [competition.id]);
 
       for (const player of players) {
-        const collection = await request(getApp()).get('/api/collectibles').set(auth(player)).expect(200);
+        const collection = await request(getApp())
+          .get('/api/collectibles')
+          .set(auth(player))
+          .expect(200);
         expect(collection.body.collectibles).toHaveLength(1);
         expect(collection.body.collectibles[0].goalTitle).toBe(competition.name);
       }
@@ -712,7 +785,9 @@ suite('Competições', () => {
       const { competition } = await finishedCompetitionWith([4, 2]);
       const finalized = await resolveAllCompetitions();
       expect(finalized).toBe(1);
-      const row = await pool.query('SELECT finalized_at FROM competitions WHERE id = $1', [competition.id]);
+      const row = await pool.query('SELECT finalized_at FROM competitions WHERE id = $1', [
+        competition.id,
+      ]);
       expect(row.rows[0].finalized_at).not.toBeNull();
     });
 

@@ -52,7 +52,11 @@ describe('tallyCompetitionDays', () => {
     const tally = tallyCompetitionDays({
       ...WINDOW,
       todayInUserTz: '2026-10-20',
-      days: [day('2026-09-30', 'COMPLETED'), day('2026-10-01', 'COMPLETED'), day('2026-10-11', 'COMPLETED')],
+      days: [
+        day('2026-09-30', 'COMPLETED'),
+        day('2026-10-01', 'COMPLETED'),
+        day('2026-10-11', 'COMPLETED'),
+      ],
     });
     expect(tally).toEqual({ completedDays: 1, scheduledDays: 1, scoreBasisPoints: 10000 });
   });
@@ -116,9 +120,11 @@ describe('tallyCompetitionDays', () => {
   });
 
   it('scores 0% for a participant with no goal days in the window', () => {
-    expect(
-      tallyCompetitionDays({ ...WINDOW, todayInUserTz: today, days: [] }),
-    ).toEqual({ completedDays: 0, scheduledDays: 0, scoreBasisPoints: 0 });
+    expect(tallyCompetitionDays({ ...WINDOW, todayInUserTz: today, days: [] })).toEqual({
+      completedDays: 0,
+      scheduledDays: 0,
+      scoreBasisPoints: 0,
+    });
   });
 
   it('decides every in-window day once the grace window after the end has closed', () => {
@@ -191,7 +197,9 @@ describe('rankCompetition', () => {
 
   it('shares first place when everyone is tied', () => {
     const ranked = rankCompetition([entry('a', 7000), entry('b', 7000), entry('c', 7000)]);
-    expect(ranked.every((row) => row.position === 1 && row.rewardRarity === 'LEGENDARY')).toBe(true);
+    expect(ranked.every((row) => row.position === 1 && row.rewardRarity === 'LEGENDARY')).toBe(
+      true,
+    );
   });
 
   it.each([
@@ -235,7 +243,9 @@ describe('rankCompetition', () => {
 describe('competition lifecycle', () => {
   it('derives UPCOMING, ACTIVE and FINISHED', () => {
     const base = { startDate: '2026-10-01', isFinalized: false };
-    expect(deriveCompetitionStatus({ ...base, todayInCompetitionTz: '2026-09-30' })).toBe('UPCOMING');
+    expect(deriveCompetitionStatus({ ...base, todayInCompetitionTz: '2026-09-30' })).toBe(
+      'UPCOMING',
+    );
     expect(deriveCompetitionStatus({ ...base, todayInCompetitionTz: '2026-10-01' })).toBe('ACTIVE');
     expect(deriveCompetitionStatus({ ...base, todayInCompetitionTz: '2026-12-01' })).toBe('ACTIVE');
     expect(
@@ -245,10 +255,17 @@ describe('competition lifecycle', () => {
 
   it('locks the result only after the Ontem window has closed for every participant', () => {
     const endDate = '2026-10-10';
-    expect(isCompetitionReadyToFinalize({ endDate, todaysInParticipantTz: ['2026-10-11'] })).toBe(false);
-    expect(isCompetitionReadyToFinalize({ endDate, todaysInParticipantTz: ['2026-10-12'] })).toBe(true);
+    expect(isCompetitionReadyToFinalize({ endDate, todaysInParticipantTz: ['2026-10-11'] })).toBe(
+      false,
+    );
+    expect(isCompetitionReadyToFinalize({ endDate, todaysInParticipantTz: ['2026-10-12'] })).toBe(
+      true,
+    );
     expect(
-      isCompetitionReadyToFinalize({ endDate, todaysInParticipantTz: ['2026-10-12', '2026-10-11'] }),
+      isCompetitionReadyToFinalize({
+        endDate,
+        todaysInParticipantTz: ['2026-10-12', '2026-10-11'],
+      }),
     ).toBe(false);
     expect(competitionResultsDate(endDate)).toBe('2026-10-12');
   });
@@ -270,16 +287,27 @@ describe('competition schemas', () => {
 
   it('rejects an end before the start and lengths outside 7–365 days', () => {
     const base = { name: 'Desafio', startDate: '2026-10-10' };
-    expect(createCompetitionSchema.safeParse({ ...base, endDate: '2026-10-01' }).success).toBe(false);
-    expect(createCompetitionSchema.safeParse({ ...base, endDate: '2026-10-15' }).success).toBe(false);
-    expect(createCompetitionSchema.safeParse({ ...base, endDate: '2026-10-16' }).success).toBe(true);
-    expect(createCompetitionSchema.safeParse({ ...base, endDate: '2027-10-10' }).success).toBe(false);
+    expect(createCompetitionSchema.safeParse({ ...base, endDate: '2026-10-01' }).success).toBe(
+      false,
+    );
+    expect(createCompetitionSchema.safeParse({ ...base, endDate: '2026-10-15' }).success).toBe(
+      false,
+    );
+    expect(createCompetitionSchema.safeParse({ ...base, endDate: '2026-10-16' }).success).toBe(
+      true,
+    );
+    expect(createCompetitionSchema.safeParse({ ...base, endDate: '2027-10-10' }).success).toBe(
+      false,
+    );
   });
 
   it('rejects impossible dates without throwing', () => {
     expect(
-      createCompetitionSchema.safeParse({ name: 'Desafio', startDate: '2026-02-30', endDate: '2026-03-30' })
-        .success,
+      createCompetitionSchema.safeParse({
+        name: 'Desafio',
+        startDate: '2026-02-30',
+        endDate: '2026-03-30',
+      }).success,
     ).toBe(false);
   });
 

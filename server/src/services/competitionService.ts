@@ -483,8 +483,9 @@ export async function previewInvite(params: {
     endDate: current.endDate,
     durationDays: competitionDurationDays(current.startDate, current.endDate),
     status: statusOf(current, params.now),
-    creatorName: participants.find((participant) => participant.userId === current.creatorId)
-      ?.userName ?? null,
+    creatorName:
+      participants.find((participant) => participant.userId === current.creatorId)?.userName ??
+      null,
     participantNames: participants.map((participant) => participant.userName),
     participantCount: participants.length,
     maxParticipants: MAX_COMPETITION_PARTICIPANTS,
@@ -616,7 +617,9 @@ export async function listCompetitions(params: {
       mine = standing ? toRankingEntryFromStanding(standing, params.user.id) : undefined;
     }
 
-    summaries.push(buildSummary({ competition, participants, status, viewerId: params.user.id, mine }));
+    summaries.push(
+      buildSummary({ competition, participants, status, viewerId: params.user.id, mine }),
+    );
   }
   return summaries;
 }

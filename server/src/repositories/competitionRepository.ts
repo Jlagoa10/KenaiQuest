@@ -29,7 +29,14 @@ export async function createCompetition(
     `INSERT INTO competitions (name, creator_id, start_date, end_date, timezone, invite_code)
      VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING ${SELECT_COLUMNS}`,
-    [params.name, params.creatorId, params.startDate, params.endDate, params.timezone, params.inviteCode],
+    [
+      params.name,
+      params.creatorId,
+      params.startDate,
+      params.endDate,
+      params.timezone,
+      params.inviteCode,
+    ],
   );
   return mapCompetition(result.rows[0]);
 }
@@ -262,7 +269,10 @@ export async function listResultsForUser(
   return byCompetition;
 }
 
-export async function hasPendingRewards(competitionId: string, db: Queryable = pool): Promise<boolean> {
+export async function hasPendingRewards(
+  competitionId: string,
+  db: Queryable = pool,
+): Promise<boolean> {
   const result = await db.query(
     `SELECT 1 FROM competition_results
      WHERE competition_id = $1 AND reward_rarity IS NOT NULL AND rewarded_at IS NULL
