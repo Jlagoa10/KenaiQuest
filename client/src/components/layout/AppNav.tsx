@@ -54,9 +54,8 @@ export function MobileNav({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t md:hidden"
+      className="kq-chrome fixed inset-x-0 bottom-0 z-40 border-t md:hidden"
       style={{
-        backgroundColor: 'var(--bg-surface)',
         borderColor: 'var(--border-subtle)',
         // Keeps the bar clear of the iOS home indicator.
         paddingBottom: 'env(safe-area-inset-bottom)',

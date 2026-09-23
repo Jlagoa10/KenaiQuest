@@ -3,8 +3,9 @@ import { Logo } from '../components/brand/Logo';
 import { PublicHeader } from '../components/layout/PublicHeader';
 
 /*
- * The shell paints no background colour of its own: <body> already carries
- * --bg-app, so each public screen decides what sits behind its own content.
+ * The shell paints no background of its own: the global application
+ * background (body::before in theme.css) sits behind every public screen, and
+ * the header and footer are translucent chrome over it.
  *
  * The top bar is PublicHeader, rendered once here. Landing, login and sign-up
  * are all nested inside this layout, so every public screen gets exactly the
@@ -19,10 +20,7 @@ export function PublicLayout() {
         <Outlet />
       </main>
 
-      <footer
-        className="border-t py-8"
-        style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--bg-surface)' }}
-      >
+      <footer className="kq-chrome border-t py-8" style={{ borderColor: 'var(--border-subtle)' }}>
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 text-center sm:px-6">
           <Logo size="sm" />
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>

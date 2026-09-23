@@ -6,7 +6,6 @@ function FullPageLoader() {
   return (
     <div
       className="flex min-h-dvh items-center justify-center"
-      style={{ backgroundColor: 'var(--bg-app)' }}
       role="status"
       aria-live="polite"
     >

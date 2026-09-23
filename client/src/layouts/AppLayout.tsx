@@ -21,7 +21,8 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-dvh" style={{ backgroundColor: 'var(--bg-app)' }}>
+    // No fill here: the global background (body::before) shows behind every page.
+    <div className="min-h-dvh">
       <a
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2"
@@ -31,8 +32,8 @@ export function AppLayout() {
       </a>
 
       <header
-        className="sticky top-0 z-30 border-b"
-        style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+        className="kq-chrome sticky top-0 z-30 border-b"
+        style={{ borderColor: 'var(--border-subtle)' }}
       >
         <div className="kq-topbar-inner mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link to="/dashboard" className="shrink-0" aria-label="Kenai Quest, ir para o dashboard">
