@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   competitionDurationDays,
   competitionResultsDate,
+  competitionRewardRarities,
   computeScoreBasisPoints,
   deriveCompetitionStatus,
   isCompetitionReadyToFinalize,
@@ -137,17 +138,47 @@ describe('tallyCompetitionDays', () => {
   });
 });
 
-describe('rarityForPosition', () => {
-  it('maps positions 1–5 to Legendary → Common', () => {
-    expect([1, 2, 3, 4, 5].map(rarityForPosition)).toEqual([
+describe('competitionRewardRarities', () => {
+  it('offers the top rarities only to bigger competitions; last place is always Common', () => {
+    expect(competitionRewardRarities(2)).toEqual(['UNCOMMON', 'COMMON']);
+    expect(competitionRewardRarities(3)).toEqual(['RARE', 'UNCOMMON', 'COMMON']);
+    expect(competitionRewardRarities(4)).toEqual(['EPIC', 'RARE', 'UNCOMMON', 'COMMON']);
+    expect(competitionRewardRarities(5)).toEqual([
       'LEGENDARY',
       'EPIC',
       'RARE',
       'UNCOMMON',
       'COMMON',
     ]);
-    expect(rarityForPosition(6)).toBeNull();
-    expect(rarityForPosition(0)).toBeNull();
+  });
+
+  it('offers nothing outside 2–5 participants', () => {
+    expect(competitionRewardRarities(0)).toEqual([]);
+    expect(competitionRewardRarities(1)).toEqual([]);
+    expect(competitionRewardRarities(6)).toEqual([]);
+  });
+});
+
+describe('rarityForPosition', () => {
+  it('maps a position to its rarity for the competition size', () => {
+    expect([1, 2, 3, 4, 5].map((position) => rarityForPosition(position, 5))).toEqual([
+      'LEGENDARY',
+      'EPIC',
+      'RARE',
+      'UNCOMMON',
+      'COMMON',
+    ]);
+    expect(rarityForPosition(1, 2)).toBe('UNCOMMON');
+    expect(rarityForPosition(1, 3)).toBe('RARE');
+    expect(rarityForPosition(1, 4)).toBe('EPIC');
+    expect(rarityForPosition(4, 4)).toBe('COMMON');
+  });
+
+  it('returns null for positions outside the competition', () => {
+    expect(rarityForPosition(0, 5)).toBeNull();
+    expect(rarityForPosition(6, 5)).toBeNull();
+    expect(rarityForPosition(3, 2)).toBeNull();
+    expect(rarityForPosition(1, 1)).toBeNull();
   });
 });
 
@@ -192,32 +223,91 @@ describe('rankCompetition', () => {
     const byUser = (rows: typeof a) =>
       Object.fromEntries(rows.map((row) => [row.userId, [row.position, row.rewardRarity]]));
     expect(byUser(a)).toEqual(byUser(b));
-    expect(byUser(a)).toEqual({ z: [1, 'LEGENDARY'], x: [2, 'EPIC'], y: [2, 'EPIC'] });
+    expect(byUser(a)).toEqual({ z: [1, 'RARE'], x: [2, 'UNCOMMON'], y: [2, 'UNCOMMON'] });
   });
 
   it('shares first place when everyone is tied', () => {
     const ranked = rankCompetition([entry('a', 7000), entry('b', 7000), entry('c', 7000)]);
-    expect(ranked.every((row) => row.position === 1 && row.rewardRarity === 'LEGENDARY')).toBe(
-      true,
-    );
+    expect(ranked.every((row) => row.position === 1 && row.rewardRarity === 'RARE')).toBe(true);
   });
 
   it.each([
-    [2, ['LEGENDARY', 'EPIC']],
-    [3, ['LEGENDARY', 'EPIC', 'RARE']],
-    [4, ['LEGENDARY', 'EPIC', 'RARE', 'UNCOMMON']],
+    [2, ['UNCOMMON', 'COMMON']],
+    [3, ['RARE', 'UNCOMMON', 'COMMON']],
+    [4, ['EPIC', 'RARE', 'UNCOMMON', 'COMMON']],
     [5, ['LEGENDARY', 'EPIC', 'RARE', 'UNCOMMON', 'COMMON']],
-  ])('uses only the available positions with %i participants', (count, rarities) => {
+  ])('awards the rarities available with %i participants', (count, rarities) => {
     const ranked = rankCompetition(
       Array.from({ length: count }, (_, index) => entry(`u${index}`, 9000 - index * 1000)),
     );
     expect(ranked.map((row) => row.rewardRarity)).toEqual(rarities);
   });
 
+  it.each([
+    // [scores, expected [position, rarity] per row in score order]
+    [
+      [9000, 9000],
+      [
+        [1, 'UNCOMMON'],
+        [1, 'UNCOMMON'],
+      ],
+    ],
+    [
+      [9000, 5000, 5000],
+      [
+        [1, 'RARE'],
+        [2, 'UNCOMMON'],
+        [2, 'UNCOMMON'],
+      ],
+    ],
+    [
+      [9000, 9000, 5000],
+      [
+        [1, 'RARE'],
+        [1, 'RARE'],
+        [3, 'COMMON'],
+      ],
+    ],
+    [
+      [9000, 9000, 5000, 4000],
+      [
+        [1, 'EPIC'],
+        [1, 'EPIC'],
+        [3, 'UNCOMMON'],
+        [4, 'COMMON'],
+      ],
+    ],
+    [
+      [9000, 7000, 7000, 7000],
+      [
+        [1, 'EPIC'],
+        [2, 'RARE'],
+        [2, 'RARE'],
+        [2, 'RARE'],
+      ],
+    ],
+    [
+      [9000, 8000, 8000, 6000, 6000],
+      [
+        [1, 'LEGENDARY'],
+        [2, 'EPIC'],
+        [2, 'EPIC'],
+        [4, 'UNCOMMON'],
+        [4, 'UNCOMMON'],
+      ],
+    ],
+  ] as Array<[number[], Array<[number, string]>]>)(
+    'gives tied participants the rarity of their shared position (%j)',
+    (scores, expected) => {
+      const ranked = rankCompetition(scores.map((score, index) => entry(`u${index}`, score)));
+      expect(ranked.map((row) => [row.position, row.rewardRarity])).toEqual(expected);
+    },
+  );
+
   it('rewards nobody in a solo competition', () => {
     const [only] = rankCompetition([entry('solo', 10000, 10)]);
     expect(only?.position).toBe(1);
-    expect(only?.positionRarity).toBe('LEGENDARY');
+    expect(only?.positionRarity).toBeNull();
     expect(only?.rewardEligible).toBe(false);
     expect(only?.rewardRarity).toBeNull();
   });
@@ -233,8 +323,8 @@ describe('rankCompetition', () => {
   it('still ranks a 0% participant and rewards the others normally', () => {
     const ranked = rankCompetition([entry('a', 8000), entry('b', 0, 0), entry('c', 6000)]);
     expect(ranked.map((row) => [row.userId, row.position, row.rewardRarity])).toEqual([
-      ['a', 1, 'LEGENDARY'],
-      ['c', 2, 'EPIC'],
+      ['a', 1, 'RARE'],
+      ['c', 2, 'UNCOMMON'],
       ['b', 3, null],
     ]);
   });

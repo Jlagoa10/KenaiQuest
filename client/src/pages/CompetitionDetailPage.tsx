@@ -6,6 +6,7 @@ import {
   MIN_PARTICIPANTS_FOR_REWARDS,
   RARITY_LABELS,
   compareIsoDates,
+  competitionRewardRarities,
   formatIsoDatePtBr,
 } from '@kenai/shared';
 import { Button } from '../components/ui/Button';
@@ -137,6 +138,10 @@ export function CompetitionDetailPage() {
 
   const today = todayForTimezone(user?.timezone ?? 'America/Sao_Paulo');
   const periodOver = compareIsoDates(today, competition.endDate) > 0;
+  // A finished competition is judged on who took part when it was locked.
+  const prizeCount =
+    competition.status === 'FINISHED' ? competition.ranking.length : competition.participantCount;
+  const prizeRarities = competitionRewardRarities(prizeCount);
 
   return (
     <div className="space-y-6">
@@ -239,19 +244,24 @@ export function CompetitionDetailPage() {
                 A pontuação é a porcentagem de dias de meta concluídos no período, somando todas as
                 suas metas. Dias de hoje e de ontem ainda não marcados não contam contra você.
               </p>
+              <p style={{ color: 'var(--text-secondary)' }}>
+                {prizeRarities.length > 0
+                  ? `Prêmios com ${prizeCount} participantes:`
+                  : `Os prêmios começam com ${MIN_PARTICIPANTS_FOR_REWARDS} participantes.`}
+              </p>
               <ul className="space-y-1.5">
-                {(['LEGENDARY', 'EPIC', 'RARE', 'UNCOMMON', 'COMMON'] as const).map(
-                  (rarity, index) => (
-                    <li key={rarity} className="flex items-center justify-between gap-2">
-                      <span style={{ color: 'var(--text-secondary)' }}>{index + 1}º lugar</span>
-                      <RarityBadge rarity={rarity} size="sm" />
-                    </li>
-                  ),
-                )}
+                {prizeRarities.map((rarity, index) => (
+                  <li key={rarity} className="flex items-center justify-between gap-2">
+                    <span style={{ color: 'var(--text-secondary)' }}>{index + 1}º lugar</span>
+                    <RarityBadge rarity={rarity} size="sm" />
+                  </li>
+                ))}
               </ul>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Empates dividem a mesma posição e recebem a mesma raridade. Quem não concluir nenhum
-                dia não recebe prêmio.
+                O último lugar ganha Comum e cada posição acima sobe uma raridade — só com{' '}
+                {MAX_COMPETITION_PARTICIPANTS} participantes o 1º lugar ganha Lendária. Empates
+                dividem a mesma posição e recebem a mesma raridade. Quem não concluir nenhum dia não
+                recebe prêmio.
               </p>
             </CardBody>
           </Card>

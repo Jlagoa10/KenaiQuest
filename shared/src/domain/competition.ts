@@ -1,5 +1,5 @@
 import {
-  COMPETITION_POSITION_RARITY,
+  COMPETITION_REWARD_RARITY_LADDER,
   MIN_PARTICIPANTS_FOR_REWARDS,
   type CompetitionStatus,
 } from '../constants/competitions.js';
@@ -131,15 +131,40 @@ export interface CompetitionRankOutput {
   rewardRarity: Rarity | null;
 }
 
-export function rarityForPosition(position: number): Rarity | null {
-  return COMPETITION_POSITION_RARITY[position] ?? null;
+/**
+ * The rarities on offer in a competition of this size, indexed by position − 1.
+ *
+ *   2 participants  Incomum, Comum
+ *   3 participants  Raro, Incomum, Comum
+ *   4 participants  Épico, Raro, Incomum, Comum
+ *   5 participants  Lendário, Épico, Raro, Incomum, Comum
+ *
+ * Empty below MIN_PARTICIPANTS_FOR_REWARDS (nothing is awarded) and above the
+ * participant cap (cannot happen).
+ */
+export function competitionRewardRarities(participantCount: number): Rarity[] {
+  if (
+    !Number.isInteger(participantCount) ||
+    participantCount < MIN_PARTICIPANTS_FOR_REWARDS ||
+    participantCount > COMPETITION_REWARD_RARITY_LADDER.length
+  ) {
+    return [];
+  }
+  return COMPETITION_REWARD_RARITY_LADDER.slice(-participantCount);
+}
+
+/** The rarity a final position stands for in a competition of this size. */
+export function rarityForPosition(position: number, participantCount: number): Rarity | null {
+  if (!Number.isInteger(position) || position < 1) return null;
+  return competitionRewardRarities(participantCount)[position - 1] ?? null;
 }
 
 /**
  * Standard competition ranking: a participant's position is one plus the number
  * of participants with a strictly higher score. Tied participants therefore
  * share a position — and with it the same rarity — and the next position
- * skips accordingly. There is deliberately no tie-breaker.
+ * skips accordingly. There is deliberately no tie-breaker. Which rarity a
+ * position stands for depends on how many took part (competitionRewardRarities).
  *
  * Anti-farming: nobody is rewarded when fewer than MIN_PARTICIPANTS_FOR_REWARDS
  * took part, and a participant who completed no day at all earns nothing.
@@ -155,7 +180,7 @@ export function rankCompetition<T extends CompetitionRankInput>(
   const ranked = entries.map((entry) => {
     const position =
       1 + entries.filter((other) => other.scoreBasisPoints > entry.scoreBasisPoints).length;
-    const positionRarity = rarityForPosition(position);
+    const positionRarity = rarityForPosition(position, entries.length);
     const rewardEligible = rewardsEnabled && entry.completedDays > 0 && positionRarity !== null;
     return {
       ...entry,

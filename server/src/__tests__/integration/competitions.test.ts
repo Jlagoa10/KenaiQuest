@@ -420,16 +420,15 @@ suite('Competições', () => {
         ['Maria', 2, 75],
         ['Pedro', 4, 0],
       ]);
+      // Four participants: 1st Épica, 2nd Rara, 3rd Incomum, 4th Comum.
       expect(rewardsByName(detail)).toEqual({
-        João: [1, 'LEGENDARY'],
-        Lucas: [2, 'EPIC'],
-        Maria: [2, 'EPIC'],
-        // 0%: the position stands for Incomum, but nothing would be awarded.
+        João: [1, 'EPIC'],
+        Lucas: [2, 'RARE'],
+        Maria: [2, 'RARE'],
+        // 0%: the position stands for Comum, but nothing would be awarded.
         Pedro: [4, null],
       });
-      expect(detail.ranking.find((entry) => entry.name === 'Pedro')?.positionRarity).toBe(
-        'UNCOMMON',
-      );
+      expect(detail.ranking.find((entry) => entry.name === 'Pedro')?.positionRarity).toBe('COMMON');
       expect(detail.myPosition).toBe(4);
 
       // Pedro marks today through the real goal endpoint: the ranking moves.
@@ -447,7 +446,7 @@ suite('Competições', () => {
         scheduledDays: 5,
         scorePercent: 20,
       });
-      expect(pedroRow?.rewardRarity).toBe('UNCOMMON');
+      expect(pedroRow?.rewardRarity).toBe('COMMON');
 
       // Nothing was stored while the competition runs.
       const stored = await pool.query('SELECT count(*)::int AS total FROM competition_results');
@@ -581,12 +580,12 @@ suite('Competições', () => {
     });
 
     it.each([
-      [2, [5, 3], ['LEGENDARY', 'EPIC']],
-      [3, [5, 4, 3], ['LEGENDARY', 'EPIC', 'RARE']],
-      [4, [7, 5, 3, 1], ['LEGENDARY', 'EPIC', 'RARE', 'UNCOMMON']],
+      [2, [5, 3], ['UNCOMMON', 'COMMON']],
+      [3, [5, 4, 3], ['RARE', 'UNCOMMON', 'COMMON']],
+      [4, [7, 5, 3, 1], ['EPIC', 'RARE', 'UNCOMMON', 'COMMON']],
       [5, [7, 6, 5, 4, 3], ['LEGENDARY', 'EPIC', 'RARE', 'UNCOMMON', 'COMMON']],
     ] as Array<[number, number[], Rarity[]]>)(
-      'usa apenas as posições disponíveis com %i participantes',
+      'a raridade depende do número de participantes (%i)',
       async (_count, completed, expected) => {
         await seedArtworkForEveryRarity();
         const { players, competition } = await finishedCompetitionWith(completed);
@@ -610,9 +609,9 @@ suite('Competições', () => {
       const { players, competition } = await finishedCompetitionWith([5, 5, 3]);
       const detail = await getDetail(players[2] as Player, competition.id);
       expect(rewardsByName(detail)).toEqual({
-        'Jogador 1': [1, 'LEGENDARY'],
-        'Jogador 2': [1, 'LEGENDARY'],
-        'Jogador 3': [3, 'RARE'],
+        'Jogador 1': [1, 'RARE'],
+        'Jogador 2': [1, 'RARE'],
+        'Jogador 3': [3, 'COMMON'],
       });
 
       const minted = await pool.query(
@@ -622,8 +621,8 @@ suite('Competições', () => {
         [competition.id],
       );
       expect(minted.rows).toEqual([
-        { rarity: 'RARE', total: 1 },
-        { rarity: 'LEGENDARY', total: 2 },
+        { rarity: 'COMMON', total: 1 },
+        { rarity: 'RARE', total: 2 },
       ]);
     });
 
@@ -632,7 +631,7 @@ suite('Competições', () => {
       const { players, competition } = await finishedCompetitionWith([4, 0]);
       const detail = await getDetail(players[1] as Player, competition.id);
       expect(rewardsByName(detail)).toEqual({
-        'Jogador 1': [1, 'LEGENDARY'],
+        'Jogador 1': [1, 'UNCOMMON'],
         'Jogador 2': [2, null],
       });
       expect(detail.ranking.find((entry) => entry.isMe)?.rewardStatus).toBe('NONE');
@@ -702,8 +701,8 @@ suite('Competições', () => {
       const { players, competition } = await finishedCompetitionWith([3, 5]);
       const before = await getDetail(players[0] as Player, competition.id);
       expect(rewardsByName(before)).toEqual({
-        'Jogador 2': [1, 'LEGENDARY'],
-        'Jogador 1': [2, 'EPIC'],
+        'Jogador 2': [1, 'UNCOMMON'],
+        'Jogador 1': [2, 'COMMON'],
       });
 
       // Later goal activity inside the old window cannot move the stored result.
@@ -759,17 +758,17 @@ suite('Competições', () => {
     });
 
     it('mantém o prêmio pendente sem arte da raridade e o entrega depois, sem rebaixar', async () => {
-      // Only EPIC is stocked: first place (Lendária) has nothing to draw from.
-      await seedArtwork({ name: 'Kenai Épico', rarity: 'EPIC' });
+      // Only COMMON is stocked: first place (Incomum) has nothing to draw from.
+      await seedArtwork({ name: 'Kenai Comum', rarity: 'COMMON' });
       const { players, competition } = await finishedCompetitionWith([6, 3]);
 
       const first = await getDetail(players[0] as Player, competition.id);
       expect(first.ranking.map((entry) => [entry.rewardRarity, entry.rewardStatus])).toEqual([
-        ['LEGENDARY', 'PENDING'],
-        ['EPIC', 'AWARDED'],
+        ['UNCOMMON', 'PENDING'],
+        ['COMMON', 'AWARDED'],
       ]);
 
-      const legendary = await seedArtwork({ name: 'Kenai Lendário', rarity: 'LEGENDARY' });
+      const uncommon = await seedArtwork({ name: 'Kenai Incomum', rarity: 'UNCOMMON' });
       const second = await getDetail(players[0] as Player, competition.id);
       expect(second.ranking.map((entry) => entry.rewardStatus)).toEqual(['AWARDED', 'AWARDED']);
 
@@ -777,7 +776,7 @@ suite('Competições', () => {
         'SELECT artwork_id FROM collectibles WHERE source_competition_id = $1 AND owner_id = $2',
         [competition.id, players[0]?.user.id],
       );
-      expect(prize.rows).toEqual([{ artwork_id: legendary.id }]);
+      expect(prize.rows).toEqual([{ artwork_id: uncommon.id }]);
     });
 
     it('a varredura agendada trava competições que ninguém abriu', async () => {
@@ -804,7 +803,7 @@ suite('Competições', () => {
           status: 'FINISHED',
           myPosition: 2,
           myScorePercent: 28.57,
-          myRewardRarity: 'EPIC',
+          myRewardRarity: 'COMMON',
         }),
       ]);
     });

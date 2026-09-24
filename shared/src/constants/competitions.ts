@@ -46,11 +46,16 @@ export const COMPETITION_STATUS_LABELS: Record<CompetitionStatus, string> = {
   FINISHED: 'Finalizada',
 };
 
-/** Final position → reward rarity. Positions beyond the table earn nothing. */
-export const COMPETITION_POSITION_RARITY: Readonly<Record<number, Rarity>> = {
-  1: 'LEGENDARY',
-  2: 'EPIC',
-  3: 'RARE',
-  4: 'UNCOMMON',
-  5: 'COMMON',
-};
+/**
+ * Reward rarities from best to worst. A competition with N participants awards
+ * the last N rungs: last place always earns Common and each position above it
+ * one rarity more, so only a full competition (5) reaches Legendary. See
+ * competitionRewardRarities in domain/competition.ts.
+ */
+export const COMPETITION_REWARD_RARITY_LADDER: readonly Rarity[] = [
+  'LEGENDARY',
+  'EPIC',
+  'RARE',
+  'UNCOMMON',
+  'COMMON',
+];
