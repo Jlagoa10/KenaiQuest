@@ -517,9 +517,11 @@ function toRankingEntryFromStanding(
   };
 }
 
+/** `rankedCount`: how many were ranked when the result was locked. */
 function toRankingEntryFromResult(
   result: CompetitionResultRecord,
   viewerId: string,
+  rankedCount: number,
 ): CompetitionRankingEntryDto {
   const entry: CompetitionRankingEntryDto = {
     userId: result.userId,
@@ -529,7 +531,7 @@ function toRankingEntryFromResult(
     scorePercent: basisPointsToPercent(result.scoreBasisPoints),
     completedDays: result.completedDays,
     scheduledDays: result.scheduledDays,
-    positionRarity: rarityForPosition(result.position),
+    positionRarity: rarityForPosition(result.position, rankedCount),
     rewardRarity: result.rewardRarity,
     rewardStatus: !result.rewardRarity ? 'NONE' : result.rewardedAt ? 'AWARDED' : 'PENDING',
   };
@@ -548,7 +550,7 @@ async function buildRanking(params: {
   const { competition, participants, status, viewerId, now } = params;
   if (status === 'FINISHED') {
     const results = await competitionRepository.listResults(competition.id);
-    return results.map((result) => toRankingEntryFromResult(result, viewerId));
+    return results.map((result) => toRankingEntryFromResult(result, viewerId, results.length));
   }
   // Before the start there is nothing to rank: everyone would sit tied at 0%.
   if (status === 'UPCOMING') return [];
@@ -610,7 +612,9 @@ export async function listCompetitions(params: {
     let mine: CompetitionRankingEntryDto | undefined;
     if (status === 'FINISHED') {
       const result = myResults.get(competition.id);
-      mine = result ? toRankingEntryFromResult(result, params.user.id) : undefined;
+      mine = result
+        ? toRankingEntryFromResult(result, params.user.id, participants.length)
+        : undefined;
     } else if (status === 'ACTIVE') {
       const standings = await computeStandings({ competition, participants, now: params.now });
       const standing = standings.find((entry) => entry.userId === params.user.id);

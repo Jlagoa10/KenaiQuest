@@ -118,8 +118,9 @@ export function NewCompetitionPage() {
                 </p>
                 <p className="mt-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
                   A pontuação é a porcentagem de dias de meta concluídos nesse período, somando
-                  todas as metas de cada participante. No final, 1º lugar ganha um Kenai Lendário,
-                  2º Épico, 3º Raro, 4º Incomum e 5º Comum — empates recebem a mesma raridade.
+                  todas as metas de cada participante. No final, o último lugar ganha um Kenai Comum
+                  e cada posição acima sobe uma raridade: com 2 participantes o 1º ganha Incomum,
+                  com 5 ganha Lendário. Empates recebem a mesma raridade.
                 </p>
               </div>
             )}
